@@ -1,0 +1,71 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>Pagos</h1>
+      <p>Total registrado: <strong>{{ $total() | currency: 'PEN' : 'symbol-narrow' }}</strong></p>
+    </div>
+    @if ($canEdit()) {
+      <a mat-flat-button class="btn-primary" routerLink="/pages/pago/new">
+        <mat-icon>add</mat-icon> Registrar Pago
+      </a>
+    }
+  </div>
+
+  <router-outlet></router-outlet>
+
+  <div class="table-card">
+    <div class="table-toolbar">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Buscar</mat-label>
+        <input matInput (keyup)="applyFilter($event)" placeholder="Contrato o estado" #input />
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+    </div>
+
+    <div class="table-scroll">
+      <table mat-table [dataSource]="$dataSource()" matSort>
+        <ng-container matColumnDef="contrato">
+          <th mat-header-cell *matHeaderCellDef>Contrato</th>
+          <td mat-cell *matCellDef="let row">
+            <a class="link" [routerLink]="['/pages/contrato/detail', row.idContrato]">{{ $numeroContrato().get(row.idContrato) ?? '#' + row.idContrato }}</a>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="fechaPago">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha</th>
+          <td mat-cell *matCellDef="let row">{{ row.fechaPago | date: 'dd/MM/yyyy' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="monto">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Monto</th>
+          <td mat-cell *matCellDef="let row">{{ row.monto | currency: 'PEN' : 'symbol-narrow' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="estado">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Estado</th>
+          <td mat-cell *matCellDef="let row"><span [class]="row.estado | estadoClass">{{ row.estado | estadoLabel }}</span></td>
+        </ng-container>
+
+        <ng-container matColumnDef="conformidad">
+          <th mat-header-cell *matHeaderCellDef>Conformidad</th>
+          <td mat-cell *matCellDef="let row">
+            <mat-icon [style.color]="row.conformidadEmitida ? 'var(--fd-success)' : 'var(--fd-danger)'">
+              {{ row.conformidadEmitida ? 'check_circle' : 'cancel' }}
+            </mat-icon>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+        <tr class="mat-row" *matNoDataRow>
+          <td class="no-data" [attr.colspan]="displayedColumns.length">
+            {{ input.value ? 'Sin resultados para "' + input.value + '"' : 'Aún no hay pagos registrados' }}
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Seleccionar página de pagos"></mat-paginator>
+  </div>
+</div>

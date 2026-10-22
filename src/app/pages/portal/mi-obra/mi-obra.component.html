@@ -1,0 +1,55 @@
+<header class="portal-top">
+  <img src="images/logo-fadide.png" alt="FADIDE">
+  <span class="portal-spacer"></span>
+  <span>{{ authService.$session()?.nombreCompleto }}</span>
+  <button mat-stroked-button (click)="authService.logout()"><mat-icon>logout</mat-icon> Cerrar sesión</button>
+</header>
+
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>Mi Obra</h1>
+      <p>Avance de tus obras supervisadas por FADIDE.</p>
+    </div>
+  </div>
+
+  @if ($error()) {
+    <div class="card no-data">{{ $error() }}</div>
+  } @else if ($obras(); as obras) {
+    @for (o of obras; track o.proyecto.idProyecto) {
+      <div class="card">
+        <h2 class="card-title"><mat-icon>apartment</mat-icon> {{ o.proyecto.nombre }}
+          <span [class]="o.proyecto.estado | estadoClass">{{ o.proyecto.estado | estadoLabel }}</span>
+        </h2>
+        <div class="detail-grid">
+          <div><small>Ubicación</small><strong>{{ o.proyecto.ubicacion }}</strong></div>
+          <div><small>Licencia</small><strong>{{ o.licencia?.numero ?? '—' }}</strong></div>
+        </div>
+
+        @for (c of o.contratos; track c.contrato.idContrato) {
+          <div class="card" style="margin-top: 16px; box-shadow: none; border: 1px solid var(--fd-border)">
+            <div class="detail-grid">
+              <div><small>Contrato</small><strong>{{ c.contrato.numeroContrato }}</strong></div>
+              <div><small>Monto</small><strong>{{ c.contrato.montoTotal | currency: 'PEN' : 'symbol-narrow' }}</strong></div>
+              <div><small>Plazo</small><strong>{{ c.contrato.fechaInicio | date: 'dd/MM/yyyy' }} — {{ c.contrato.fechaFin | date: 'dd/MM/yyyy' }}</strong></div>
+              <div class="full-row">
+                <small>Avance físico</small>
+                <strong>{{ (c.supervision?.avance ?? 0) | number: '1.0-2' }}%</strong>
+                <div class="progress"><span [style.width.%]="c.supervision?.avance ?? 0"></span></div>
+              </div>
+              @for (ob of c.observaciones; track ob.idObservacion) {
+                <div class="full-row"><small>{{ ob.fecha | date: 'dd/MM/yyyy' }}</small>{{ ob.descripcion }}</div>
+              }
+            </div>
+          </div>
+        } @empty {
+          <p class="no-data">Esta obra aún no tiene contratos.</p>
+        }
+      </div>
+    } @empty {
+      <div class="card no-data">No tienes obras registradas.</div>
+    }
+  } @else {
+    <p class="no-data">Cargando...</p>
+  }
+</div>
