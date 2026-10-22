@@ -1,0 +1,47 @@
+<form class="card form-card" [formGroup]="$form()" (submit)="save()">
+  <h2 class="card-title"><mat-icon>report_problem</mat-icon> Aplicar penalidad</h2>
+
+  <div class="form-grid">
+    <mat-form-field appearance="outline">
+      <mat-label>Contrato</mat-label>
+      <mat-select formControlName="idContrato">
+        @for (c of $contratos(); track c.idContrato) {
+          <mat-option [value]="c.idContrato">{{ c.numeroContrato }}</mat-option>
+        }
+      </mat-select>
+      <mat-error>Selecciona el contrato</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Monto (UIT)</mat-label>
+      <input matInput type="number" step="0.0001" formControlName="montoUit" />
+      <mat-error>El monto en UIT es obligatorio</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Fecha de aplicación</mat-label>
+      <input matInput type="date" formControlName="fechaAplicacion" />
+      <mat-error>La fecha es obligatoria</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Estado</mat-label>
+      <mat-select formControlName="estado">
+        @for (e of estados; track e) {
+          <mat-option [value]="e">{{ e | estadoLabel }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Motivo</mat-label>
+      <textarea matInput rows="2" formControlName="motivo" placeholder="Incumplimiento del plazo (Cláusula Sétima)"></textarea>
+      <mat-error>El motivo es obligatorio (máx. 255 caracteres)</mat-error>
+    </mat-form-field>
+  </div>
+
+  <div class="form-actions">
+    <a mat-button routerLink="/pages/penalidad">Cancelar</a>
+    <button mat-flat-button class="btn-primary" type="submit"><mat-icon>done</mat-icon> Guardar</button>
+  </div>
+</form>
