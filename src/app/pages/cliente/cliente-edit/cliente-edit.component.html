@@ -1,0 +1,35 @@
+<form class="card form-card" [formGroup]="$form()" (submit)="save()">
+  <h2 class="card-title"><mat-icon>{{ $isEdit() ? 'edit' : 'person_add' }}</mat-icon> {{ $isEdit() ? 'Editar cliente' : 'Nuevo cliente' }}</h2>
+
+  <div class="form-grid">
+    <mat-form-field appearance="outline">
+      <mat-label>Razón social / Nombre</mat-label>
+      <input matInput formControlName="razonSocial" />
+      <mat-error>La razón social es obligatoria (máx. 150 caracteres)</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>RUC</mat-label>
+      <input matInput formControlName="ruc" maxlength="11" inputmode="numeric" />
+      <mat-error>El RUC debe tener 11 dígitos</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Dirección</mat-label>
+      <input matInput formControlName="direccion" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Teléfono</mat-label>
+      <input matInput formControlName="telefono" maxlength="9" inputmode="numeric" />
+      <mat-error>9 dígitos, debe empezar con 9</mat-error>
+    </mat-form-field>
+  </div>
+
+  <div class="form-actions">
+    <a mat-button routerLink="/pages/cliente">Cancelar</a>
+    <button mat-flat-button class="btn-primary" type="submit">
+      <mat-icon>done</mat-icon> {{ $isEdit() ? 'Actualizar' : 'Guardar' }}
+    </button>
+  </div>
+</form>
