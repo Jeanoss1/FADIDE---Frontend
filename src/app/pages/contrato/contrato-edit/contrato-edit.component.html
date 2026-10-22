@@ -1,0 +1,60 @@
+<form class="card form-card" [formGroup]="$form()" (submit)="save()">
+  <h2 class="card-title"><mat-icon>note_add</mat-icon> Nuevo contrato</h2>
+
+  <div class="form-grid">
+    <mat-form-field appearance="outline">
+      <mat-label>N° de contrato</mat-label>
+      <input matInput formControlName="numeroContrato" placeholder="01-2026-WAGR" />
+      <mat-error>El número es obligatorio</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Obra</mat-label>
+      <mat-select formControlName="idProyecto">
+        @for (p of $proyectos(); track p.idProyecto) {
+          <mat-option [value]="p.idProyecto">{{ p.nombre }} · {{ p.cliente?.razonSocial }}</mat-option>
+        }
+      </mat-select>
+      <mat-error>Selecciona la obra</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Fecha de inicio</mat-label>
+      <input matInput type="date" formControlName="fechaInicio" />
+      <mat-error>Obligatoria</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Fecha de fin</mat-label>
+      <input matInput type="date" formControlName="fechaFin" />
+      <mat-error>Obligatoria</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Monto total</mat-label>
+      <span matTextPrefix>S/&nbsp;</span>
+      <input matInput type="number" step="0.01" formControlName="montoTotal" />
+      <mat-error>El monto debe ser mayor que cero</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Estado</mat-label>
+      <mat-select formControlName="estado">
+        @for (e of estados; track e) {
+          <mat-option [value]="e">{{ e | estadoLabel }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  @if ($form().hasError('rango')) {
+    <p class="auth-error"><mat-icon>error_outline</mat-icon> La fecha de fin no puede ser anterior a la fecha de inicio.</p>
+  }
+
+  <div class="form-actions">
+    <a mat-button routerLink="/pages/contrato">Cancelar</a>
+    <button mat-flat-button class="btn-primary" type="submit">
+      <mat-icon>done</mat-icon> Guardar
+    </button>
+  </div>
+</form>
