@@ -1,0 +1,41 @@
+<form class="card form-card" [formGroup]="$form()" (submit)="save()">
+  <h2 class="card-title"><mat-icon>{{ $isEdit() ? 'edit' : 'fact_check' }}</mat-icon> {{ $isEdit() ? 'Editar avance' : 'Registrar avance de obra' }}</h2>
+
+  <div class="form-grid">
+    <mat-form-field appearance="outline">
+      <mat-label>Contrato</mat-label>
+      <mat-select formControlName="idContrato">
+        @for (c of $contratos(); track c.idContrato) {
+          <mat-option [value]="c.idContrato">{{ c.numeroContrato }}</mat-option>
+        }
+      </mat-select>
+      <mat-error>Selecciona el contrato</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Fecha</mat-label>
+      <input matInput type="date" formControlName="fecha" [max]="maxDate" />
+      <mat-error>La fecha es obligatoria</mat-error>
+    </mat-form-field>
+
+    <div class="full">
+      <label class="slider-label">Avance físico: <strong>{{ $form().controls.avance.value }}%</strong></label>
+      <mat-slider min="0" max="100" step="1" discrete style="width: 100%">
+        <input matSliderThumb formControlName="avance" />
+      </mat-slider>
+    </div>
+
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Descripción / observaciones de campo</mat-label>
+      <textarea matInput rows="3" formControlName="descripcion"></textarea>
+      <mat-error>Máximo 1000 caracteres</mat-error>
+    </mat-form-field>
+  </div>
+
+  <div class="form-actions">
+    <a mat-button routerLink="/pages/supervision">Cancelar</a>
+    <button mat-flat-button class="btn-primary" type="submit">
+      <mat-icon>done</mat-icon> {{ $isEdit() ? 'Actualizar' : 'Guardar' }}
+    </button>
+  </div>
+</form>
