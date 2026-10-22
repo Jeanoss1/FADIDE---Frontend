@@ -1,0 +1,24 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>Bienvenido, {{ authService.$session()?.nombreCompleto }}</h1>
+      <p>Resumen general de SISCO</p>
+    </div>
+  </div>
+
+  <div class="kpis">
+    <a class="card kpi" routerLink="/pages/cliente"><mat-icon>groups</mat-icon><div><strong>{{ $totalClientes() }}</strong><span>Clientes</span></div></a>
+    <a class="card kpi" routerLink="/pages/proyecto"><mat-icon>apartment</mat-icon><div><strong>{{ $enEjecucion() }}</strong><span>Obras en ejecución</span></div></a>
+    <a class="card kpi" routerLink="/pages/contrato"><mat-icon>assignment</mat-icon><div><strong>{{ $vigentes() }}</strong><span>Contratos abiertos</span></div></a>
+    <a class="card kpi" routerLink="/pages/licencia"><mat-icon>warning_amber</mat-icon><div><strong>{{ $porVencer().length }}</strong><span>Licencias por vencer (30 d)</span></div></a>
+  </div>
+
+  <div class="card">
+    <h2 class="card-title"><mat-icon>description</mat-icon> Licencias por vencer</h2>
+    @for (l of $porVencer(); track l.idLicencia) {
+      <p class="row-item"><strong>{{ l.numero }}</strong> · {{ l.nombreProyecto }} — vence {{ l.fechaVencimiento | date: 'dd/MM/yyyy' }}</p>
+    } @empty {
+      <p class="no-data">No hay licencias por vencer en los próximos 30 días.</p>
+    }
+  </div>
+</div>
