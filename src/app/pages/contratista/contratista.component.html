@@ -1,0 +1,62 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>Contratistas</h1>
+      <p>Empresas ejecutoras asignadas a las obras.</p>
+    </div>
+    @if ($canEdit()) {
+      <a mat-flat-button class="btn-primary" routerLink="/pages/contratista/new">
+        <mat-icon>add</mat-icon> Nuevo Contratista
+      </a>
+    }
+  </div>
+
+  <router-outlet></router-outlet>
+
+  <div class="table-card">
+    <div class="table-toolbar">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Buscar</mat-label>
+        <input matInput (keyup)="applyFilter($event)" placeholder="Nombre o RUC" #input />
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+    </div>
+
+    <div class="table-scroll">
+      <table mat-table [dataSource]="$dataSource()" matSort>
+        <ng-container matColumnDef="nombre">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Razón social</th>
+          <td mat-cell *matCellDef="let row">{{ row.nombre }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="ruc">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>RUC</th>
+          <td mat-cell *matCellDef="let row">{{ row.ruc }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="actions-cell">Acciones</th>
+          <td mat-cell *matCellDef="let row" class="actions-cell">
+            <button mat-icon-button [routerLink]="['edit', row.idContratista]" matTooltip="Editar">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button (click)="delete(row)" matTooltip="Eliminar">
+              <mat-icon color="warn">delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="$displayedColumns()"></tr>
+        <tr mat-row *matRowDef="let row; columns: $displayedColumns()"></tr>
+
+        <tr class="mat-row" *matNoDataRow>
+          <td class="no-data" [attr.colspan]="$displayedColumns().length">
+            {{ input.value ? 'Sin resultados para "' + input.value + '"' : 'Aún no hay contratistas registrados' }}
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Seleccionar página de contratistas"></mat-paginator>
+  </div>
+</div>
