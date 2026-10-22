@@ -1,0 +1,57 @@
+<div class="auth-page">
+    <aside class="auth-side">
+        <div class="accent"></div>
+        <h2>SISCO</h2>
+        <p>Sistema Integrado de Gestión de Contratos y Supervisión de Obras de FADIDE Ingeniería y Construcción.</p>
+    </aside>
+
+    <main class="auth-main">
+        <div class="auth-card">
+            <a class="back" routerLink="/"><mat-icon>arrow_back</mat-icon> Volver al inicio</a>
+            <img class="auth-logo" src="images/logo-fadide.png" alt="FADIDE">
+
+            <h1>Iniciar sesión</h1>
+            <p class="subtitle">Ingresa con tu correo y contraseña</p>
+
+            @if ($error()) {
+                <div class="auth-error"><mat-icon>error_outline</mat-icon> {{ $error() }}</div>
+            }
+
+            <form [formGroup]="$form()" (submit)="login()">
+                <mat-form-field appearance="outline">
+                    <mat-label>Correo electrónico</mat-label>
+                    <input matInput type="email" formControlName="correo" autocomplete="email" placeholder="usuario@fadide.com" />
+                    <mat-icon matPrefix>mail</mat-icon>
+                    @if ($form().controls.correo.hasError('required')) {
+                        <mat-error>El correo es obligatorio</mat-error>
+                    } @else if ($form().controls.correo.hasError('email')) {
+                        <mat-error>El correo no tiene un formato válido</mat-error>
+                    }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>Contraseña</mat-label>
+                    <input matInput [type]="$hidePassword() ? 'password' : 'text'" formControlName="password" autocomplete="current-password" />
+                    <mat-icon matPrefix>lock</mat-icon>
+                    <button mat-icon-button matSuffix type="button" (click)="$hidePassword.set(!$hidePassword())"
+                        [attr.aria-label]="$hidePassword() ? 'Mostrar contraseña' : 'Ocultar contraseña'">
+                        <mat-icon>{{ $hidePassword() ? 'visibility' : 'visibility_off' }}</mat-icon>
+                    </button>
+                    <mat-error>La contraseña es obligatoria</mat-error>
+                </mat-form-field>
+
+                <button mat-flat-button class="btn-primary submit" type="submit" [disabled]="$loading()">
+                    @if ($loading()) {
+                        <mat-spinner diameter="22"></mat-spinner>
+                    } @else {
+                        Ingresar al sistema
+                    }
+                </button>
+            </form>
+
+            <app-google-button />
+
+            <p class="switch"><small>El acceso con Google es solo para clientes.</small><br>¿Eres cliente y no tienes cuenta? <a routerLink="/register">Regístrate</a></p>
+        </div>
+    </main>
+</div>

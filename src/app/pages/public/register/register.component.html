@@ -1,0 +1,83 @@
+<div class="auth-page">
+    <aside class="auth-side">
+        <div class="accent"></div>
+        <h2>Portal del Cliente</h2>
+        <p>Consulta el avance físico de tu obra, la bitácora de supervisión y las evidencias registradas por nuestros supervisores.</p>
+    </aside>
+
+    <main class="auth-main">
+        <div class="auth-card">
+            <a class="back" routerLink="/"><mat-icon>arrow_back</mat-icon> Volver al inicio</a>
+            <img class="auth-logo" src="images/logo-fadide.png" alt="FADIDE">
+
+            <h1>Crear cuenta</h1>
+            <p class="subtitle">Registro para clientes de FADIDE</p>
+
+            <div class="auth-hint">
+                <mat-icon>info</mat-icon>
+                <span>Usa el RUC con el que FADIDE te registró como cliente. Si el sistema no lo reconoce, comunícate con la oficina.</span>
+            </div>
+
+            @if ($error()) {
+                <div class="auth-error"><mat-icon>error_outline</mat-icon> {{ $error() }}</div>
+            }
+
+            <form [formGroup]="$form()" (submit)="register()">
+                <mat-form-field appearance="outline">
+                    <mat-label>Nombre completo o razón social</mat-label>
+                    <input matInput formControlName="nombreCompleto" autocomplete="name" />
+                    <mat-icon matPrefix>person</mat-icon>
+                    <mat-error>El nombre es obligatorio</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>RUC</mat-label>
+                    <input matInput formControlName="documento" maxlength="11" inputmode="numeric" placeholder="20XXXXXXXXX" />
+                    <mat-icon matPrefix>badge</mat-icon>
+                    <mat-error>El RUC debe tener 11 dígitos</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>Correo electrónico</mat-label>
+                    <input matInput type="email" formControlName="correo" autocomplete="email" />
+                    <mat-icon matPrefix>mail</mat-icon>
+                    <mat-error>Ingresa un correo válido</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>Contraseña</mat-label>
+                    <input matInput [type]="$hidePassword() ? 'password' : 'text'" formControlName="password" autocomplete="new-password" />
+                    <mat-icon matPrefix>lock</mat-icon>
+                    <button mat-icon-button matSuffix type="button" (click)="$hidePassword.set(!$hidePassword())"
+                        [attr.aria-label]="$hidePassword() ? 'Mostrar contraseña' : 'Ocultar contraseña'">
+                        <mat-icon>{{ $hidePassword() ? 'visibility' : 'visibility_off' }}</mat-icon>
+                    </button>
+                    <mat-hint>Mínimo 8 caracteres</mat-hint>
+                    <mat-error>La contraseña debe tener entre 8 y 72 caracteres</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>Confirmar contraseña</mat-label>
+                    <input matInput [type]="$hidePassword() ? 'password' : 'text'" formControlName="confirmPassword" autocomplete="new-password" />
+                    <mat-icon matPrefix>lock_reset</mat-icon>
+                    <mat-error>Confirma tu contraseña</mat-error>
+                </mat-form-field>
+                @if ($form().hasError('mismatch') && $form().controls.confirmPassword.touched) {
+                    <div class="auth-error"><mat-icon>error_outline</mat-icon> Las contraseñas no coinciden</div>
+                }
+
+                <button mat-flat-button class="btn-primary submit" type="submit" [disabled]="$loading()">
+                    @if ($loading()) {
+                        <mat-spinner diameter="22"></mat-spinner>
+                    } @else {
+                        Finalizar registro
+                    }
+                </button>
+            </form>
+
+            <app-google-button />
+
+            <p class="switch">¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a></p>
+        </div>
+    </main>
+</div>
