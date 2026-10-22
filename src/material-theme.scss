@@ -1,0 +1,30 @@
+// Tema de Angular Material con la identidad de FADIDE (naranja corporativo).
+// Learn more about theming at https://material.angular.dev/guide/theming
+@use '@angular/material' as mat;
+
+html {
+  height: 100%;
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$orange-palette,
+        tertiary: mat.$yellow-palette,
+      ),
+      typography: (
+        plain-family: 'Inter, sans-serif',
+        brand-family: 'Poppins, sans-serif',
+      ),
+      density: 0,
+    )
+  );
+}
+
+body {
+  color-scheme: light;
+  background-color: var(--fd-bg);
+  color: var(--fd-text);
+  font: var(--mat-sys-body-medium);
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  height: 100%;
+}

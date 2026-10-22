@@ -1,0 +1,25 @@
+<div class="divider"><span>o</span></div>
+
+@if (!configured) {
+  <button mat-stroked-button type="button" class="placeholder" disabled>
+    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="">
+    Continuar con Google (configura el Client ID)
+  </button>
+} @else if ($needsRuc()) {
+  <div class="auth-hint">
+    <mat-icon>info</mat-icon>
+    <span>Es tu primer ingreso con Google. Ingresa el RUC con el que FADIDE te registró como cliente.</span>
+  </div>
+  <mat-form-field appearance="outline" class="ruc">
+    <mat-label>RUC</mat-label>
+    <input matInput [formControl]="ruc" maxlength="11" inputmode="numeric" />
+    <mat-error>El RUC debe tener 11 dígitos</mat-error>
+  </mat-form-field>
+  <button mat-flat-button class="btn-primary submit" type="button" (click)="completeRegistration()">Completar registro</button>
+} @else {
+  <div class="google" #googleBtn></div>
+}
+
+@if ($error()) {
+  <div class="auth-error"><mat-icon>error_outline</mat-icon> {{ $error() }}</div>
+}
