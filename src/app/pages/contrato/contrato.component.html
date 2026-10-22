@@ -1,0 +1,89 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>Contratos</h1>
+      <p>Contratos de supervisión con su plazo, monto y estado.</p>
+    </div>
+    @if ($canEdit()) {
+      <a mat-flat-button class="btn-primary" routerLink="/pages/contrato/new">
+        <mat-icon>add</mat-icon> Nuevo Contrato
+      </a>
+    }
+  </div>
+
+  <router-outlet></router-outlet>
+
+  <div class="table-card">
+    <div class="table-toolbar">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Buscar</mat-label>
+        <input matInput (keyup)="applyFilter($event)" placeholder="N° contrato, obra o estado" #input />
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+    </div>
+
+    <div class="table-scroll">
+      <table mat-table [dataSource]="$dataSource()" matSort>
+        <ng-container matColumnDef="numeroContrato">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>N° contrato</th>
+          <td mat-cell *matCellDef="let row"><strong>{{ row.numeroContrato }}</strong></td>
+        </ng-container>
+
+        <ng-container matColumnDef="obra">
+          <th mat-header-cell *matHeaderCellDef>Obra</th>
+          <td mat-cell *matCellDef="let row">{{ $nombreObra().get(row.idProyecto) ?? '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="fechaInicio">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Inicio</th>
+          <td mat-cell *matCellDef="let row">{{ row.fechaInicio | date: 'dd/MM/yyyy' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="fechaFin">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Fin</th>
+          <td mat-cell *matCellDef="let row">
+            {{ row.fechaFin | date: 'dd/MM/yyyy' }}
+            @if (alerta(row); as msg) {
+              <br><span class="badge badge-warning">{{ msg }}</span>
+            }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="montoTotal">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Monto</th>
+          <td mat-cell *matCellDef="let row">{{ row.montoTotal | currency: 'PEN' : 'symbol-narrow' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="estado">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Estado</th>
+          <td mat-cell *matCellDef="let row"><span [class]="row.estado | estadoClass">{{ row.estado | estadoLabel }}</span></td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="actions-cell">Acciones</th>
+          <td mat-cell *matCellDef="let row" class="actions-cell">
+            <a mat-icon-button [routerLink]="['/pages/contrato/detail', row.idContrato]" matTooltip="Ver detalle">
+              <mat-icon>visibility</mat-icon>
+            </a>
+            @if ($canEdit()) {
+              <button mat-icon-button (click)="delete(row)" matTooltip="Eliminar">
+                <mat-icon color="warn">delete</mat-icon>
+              </button>
+            }
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+        <tr class="mat-row" *matNoDataRow>
+          <td class="no-data" [attr.colspan]="displayedColumns.length">
+            {{ input.value ? 'Sin resultados para "' + input.value + '"' : 'Aún no hay contratos registrados' }}
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Seleccionar página de contratos"></mat-paginator>
+  </div>
+</div>

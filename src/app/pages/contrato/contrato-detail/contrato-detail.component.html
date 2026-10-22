@@ -1,0 +1,119 @@
+<div class="page">
+  @if ($notFound()) {
+    <div class="card no-data">
+      <p>No se encontró el contrato solicitado.</p>
+      <a mat-stroked-button routerLink="/pages/contrato">Volver a contratos</a>
+    </div>
+  } @else if ($contrato(); as c) {
+    <div class="page-header">
+      <div>
+        <h1>Detalle del contrato — {{ c.numeroContrato }}</h1>
+        <p>{{ $proyecto()?.nombre }}</p>
+      </div>
+      <a mat-stroked-button routerLink="/pages/contrato"><mat-icon>arrow_back</mat-icon> Volver</a>
+    </div>
+
+    <div class="card">
+      <div class="detail-grid">
+        <div><small>Cliente</small><strong>{{ $proyecto()?.cliente?.razonSocial ?? '—' }}</strong></div>
+        <div><small>Obra</small><strong>{{ $proyecto()?.nombre ?? '—' }}</strong></div>
+        <div><small>Ubicación</small><strong>{{ $proyecto()?.ubicacion ?? '—' }}</strong></div>
+        <div><small>Estado</small><span [class]="c.estado | estadoClass">{{ c.estado | estadoLabel }}</span></div>
+        <div><small>Monto contractual</small><strong>{{ c.montoTotal | currency: 'PEN' : 'symbol-narrow' }}</strong></div>
+        <div><small>Plazo</small><strong>{{ c.fechaInicio | date: 'dd/MM/yyyy' }} — {{ c.fechaFin | date: 'dd/MM/yyyy' }}</strong></div>
+        <div><small>Total pagado</small><strong>{{ $totalPagado() | currency: 'PEN' : 'symbol-narrow' }}</strong></div>
+        <div><small>Saldo pendiente</small><strong>{{ $saldo() | currency: 'PEN' : 'symbol-narrow' }}</strong></div>
+        <div class="full-row">
+          <small>Contratistas</small>
+          <strong>
+            @for (ct of $proyecto()?.contratistas ?? []; track ct.idContratista; let last = $last) {
+              {{ ct.nombre }}{{ last ? '' : ', ' }}
+            } @empty { — }
+          </strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title"><mat-icon>payments</mat-icon> Pagos ({{ $pagos().length }})</h2>
+      <div class="table-scroll">
+        <table mat-table [dataSource]="$pagos()">
+          <ng-container matColumnDef="fechaPago">
+            <th mat-header-cell *matHeaderCellDef>Fecha</th>
+            <td mat-cell *matCellDef="let p">{{ p.fechaPago | date: 'dd/MM/yyyy' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="monto">
+            <th mat-header-cell *matHeaderCellDef>Monto</th>
+            <td mat-cell *matCellDef="let p">{{ p.monto | currency: 'PEN' : 'symbol-narrow' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="estado">
+            <th mat-header-cell *matHeaderCellDef>Estado</th>
+            <td mat-cell *matCellDef="let p"><span [class]="p.estado | estadoClass">{{ p.estado | estadoLabel }}</span></td>
+          </ng-container>
+          <ng-container matColumnDef="conformidad">
+            <th mat-header-cell *matHeaderCellDef>Conformidad</th>
+            <td mat-cell *matCellDef="let p">
+              <mat-icon [style.color]="p.conformidadEmitida ? 'var(--fd-success)' : 'var(--fd-danger)'">
+                {{ p.conformidadEmitida ? 'check_circle' : 'cancel' }}
+              </mat-icon>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="pagoColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: pagoColumns"></tr>
+          <tr class="mat-row" *matNoDataRow><td class="no-data" [attr.colspan]="pagoColumns.length">Sin pagos registrados</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title"><mat-icon>report_problem</mat-icon> Penalidades ({{ $penalidades().length }})</h2>
+      <div class="table-scroll">
+        <table mat-table [dataSource]="$penalidades()">
+          <ng-container matColumnDef="fechaAplicacion">
+            <th mat-header-cell *matHeaderCellDef>Fecha</th>
+            <td mat-cell *matCellDef="let p">{{ p.fechaAplicacion | date: 'dd/MM/yyyy' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="montoUit">
+            <th mat-header-cell *matHeaderCellDef>Monto (UIT)</th>
+            <td mat-cell *matCellDef="let p">{{ p.montoUit | number: '1.2-4' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="motivo">
+            <th mat-header-cell *matHeaderCellDef>Motivo</th>
+            <td mat-cell *matCellDef="let p">{{ p.motivo }}</td>
+          </ng-container>
+          <ng-container matColumnDef="estado">
+            <th mat-header-cell *matHeaderCellDef>Estado</th>
+            <td mat-cell *matCellDef="let p"><span [class]="p.estado | estadoClass">{{ p.estado | estadoLabel }}</span></td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="penalidadColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: penalidadColumns"></tr>
+          <tr class="mat-row" *matNoDataRow><td class="no-data" [attr.colspan]="penalidadColumns.length">Sin penalidades</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title"><mat-icon>fact_check</mat-icon> Bitácora de supervisión</h2>
+      @if ($supervision(); as s) {
+        <div class="detail-grid">
+          <div><small>Fecha de registro</small><strong>{{ s.fecha | date: 'dd/MM/yyyy' }}</strong></div>
+          <div>
+            <small>Avance físico</small>
+            <strong>{{ s.avance | number: '1.0-2' }}%</strong>
+            <div class="progress"><span [style.width.%]="s.avance"></span></div>
+          </div>
+          <div><small>Descripción</small><strong>{{ s.descripcion || '—' }}</strong></div>
+        </div>
+        <div class="form-actions">
+          <a mat-stroked-button [routerLink]="['/pages/supervision/detail', s.idSupervision]">
+            <mat-icon>photo_library</mat-icon> Ver evidencias y observaciones
+          </a>
+        </div>
+      } @else {
+        <p class="no-data">Este contrato aún no tiene supervisión registrada.</p>
+      }
+    </div>
+  } @else {
+    <p class="no-data">Cargando contrato...</p>
+  }
+</div>

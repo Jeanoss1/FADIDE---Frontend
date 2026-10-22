@@ -1,0 +1,103 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>Bitácora — Contrato {{ $supervision()?.numeroContrato }}</h1>
+      <p>Evidencias fotográficas y observaciones de la supervisión.</p>
+    </div>
+    <a mat-stroked-button routerLink="/pages/supervision"><mat-icon>arrow_back</mat-icon> Volver</a>
+  </div>
+
+  @if ($supervision(); as s) {
+    <div class="card">
+      <div class="detail-grid">
+        <div><small>Fecha de registro</small><strong>{{ s.fecha | date: 'dd/MM/yyyy' }}</strong></div>
+        <div>
+          <small>Avance físico</small>
+          <strong>{{ s.avance | number: '1.0-2' }}%</strong>
+          <div class="progress"><span [style.width.%]="s.avance"></span></div>
+        </div>
+        <div class="full-row"><small>Descripción</small><strong>{{ s.descripcion || '—' }}</strong></div>
+      </div>
+      <div class="form-actions">
+        <a mat-button [routerLink]="['/pages/contrato/detail', s.idContrato]"><mat-icon>assignment</mat-icon> Ver contrato</a>
+      </div>
+    </div>
+  }
+
+  <div class="columns">
+    <section class="card">
+      <h2 class="card-title"><mat-icon>photo_library</mat-icon> Evidencias ({{ $evidencias().length }})</h2>
+
+      @if ($isSupervisor()) {
+        <form class="inline-form" [formGroup]="evidenciaForm" (submit)="addEvidencia()">
+          <mat-form-field appearance="outline">
+            <mat-label>URL de la imagen</mat-label>
+            <input matInput formControlName="imagen" placeholder="https://..." />
+            <mat-error>La URL es obligatoria</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Fecha</mat-label>
+            <input matInput type="date" formControlName="fecha" [max]="maxDate" />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="wide">
+            <mat-label>Descripción</mat-label>
+            <input matInput formControlName="descripcion" />
+          </mat-form-field>
+          <button mat-flat-button class="btn-primary" type="submit"><mat-icon>add_a_photo</mat-icon> Agregar</button>
+        </form>
+      }
+
+      <div class="gallery">
+        @for (e of $evidencias(); track e.idEvidencia) {
+          <figure class="photo">
+            <a [href]="e.imagen" target="_blank" rel="noopener"><img [src]="e.imagen" [alt]="e.descripcion || 'Evidencia'" loading="lazy"></a>
+            <figcaption>
+              <span>{{ e.descripcion || 'Sin descripción' }}</span>
+              <small>{{ e.fecha | date: 'dd/MM/yyyy' }}</small>
+            </figcaption>
+            @if ($isSupervisor()) {
+              <button mat-icon-button class="remove" (click)="deleteEvidencia(e)" matTooltip="Eliminar"><mat-icon>delete</mat-icon></button>
+            }
+          </figure>
+        } @empty {
+          <p class="no-data">Sin evidencias registradas.</p>
+        }
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title"><mat-icon>chat</mat-icon> Observaciones ({{ $observaciones().length }})</h2>
+
+      @if ($isSupervisor()) {
+        <form class="inline-form" [formGroup]="observacionForm" (submit)="addObservacion()">
+          <mat-form-field appearance="outline" class="wide">
+            <mat-label>Observación</mat-label>
+            <textarea matInput rows="2" formControlName="descripcion"></textarea>
+            <mat-error>La observación es obligatoria</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Fecha</mat-label>
+            <input matInput type="date" formControlName="fecha" [max]="maxDate" />
+          </mat-form-field>
+          <button mat-flat-button class="btn-primary" type="submit"><mat-icon>add_comment</mat-icon> Agregar</button>
+        </form>
+      }
+
+      <ul class="timeline">
+        @for (o of $observaciones(); track o.idObservacion) {
+          <li>
+            <div>
+              <small>{{ o.fecha | date: 'dd/MM/yyyy' }}</small>
+              <p>{{ o.descripcion }}</p>
+            </div>
+            @if ($isSupervisor()) {
+              <button mat-icon-button (click)="deleteObservacion(o)" matTooltip="Eliminar"><mat-icon color="warn">delete</mat-icon></button>
+            }
+          </li>
+        } @empty {
+          <p class="no-data">Sin observaciones registradas.</p>
+        }
+      </ul>
+    </section>
+  </div>
+</div>
