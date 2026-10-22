@@ -1,0 +1,44 @@
+<form class="card form-card" [formGroup]="$form()" (submit)="save()">
+  <h2 class="card-title"><mat-icon>{{ $isEdit() ? 'edit' : 'description' }}</mat-icon> {{ $isEdit() ? 'Editar licencia' : 'Nueva licencia' }}</h2>
+
+  <div class="form-grid">
+    <mat-form-field appearance="outline">
+      <mat-label>N° de licencia</mat-label>
+      <input matInput formControlName="numero" placeholder="027-2024" />
+      <mat-error>El número es obligatorio</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Obra</mat-label>
+      <mat-select formControlName="idProyecto">
+        @for (p of $proyectos(); track p.idProyecto) {
+          <mat-option [value]="p.idProyecto">{{ p.nombre }}</mat-option>
+        }
+      </mat-select>
+      <mat-error>Selecciona la obra</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Fecha de emisión</mat-label>
+      <input matInput type="date" formControlName="fechaEmision" />
+      <mat-error>La fecha de emisión es obligatoria</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Fecha de vencimiento</mat-label>
+      <input matInput type="date" formControlName="fechaVencimiento" />
+      <mat-error>La fecha de vencimiento es obligatoria</mat-error>
+    </mat-form-field>
+  </div>
+
+  @if ($form().hasError('rango')) {
+    <p class="auth-error"><mat-icon>error_outline</mat-icon> El vencimiento no puede ser anterior a la emisión.</p>
+  }
+
+  <div class="form-actions">
+    <a mat-button routerLink="/pages/licencia">Cancelar</a>
+    <button mat-flat-button class="btn-primary" type="submit">
+      <mat-icon>done</mat-icon> {{ $isEdit() ? 'Actualizar' : 'Guardar' }}
+    </button>
+  </div>
+</form>
