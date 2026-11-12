@@ -1,6 +1,6 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -12,13 +12,7 @@ import { switchMap, tap } from 'rxjs';
 import { getErrorMessage } from '../../../core/utils/http-error';
 import { LicenciaService } from '../../../services/licencia.service';
 import { ProyectoService } from '../../../services/proyecto.service';
-
-// El vencimiento no puede ser anterior a la emisión
-function rangoValido(group: AbstractControl): ValidationErrors | null {
-  const emision = group.get('fechaEmision')?.value;
-  const vencimiento = group.get('fechaVencimiento')?.value;
-  return emision && vencimiento && vencimiento < emision ? { rango: true } : null;
-}
+import { AppValidators, errorMessage } from '../../../shared/validators';
 
 @Component({
   imports: [
@@ -42,11 +36,14 @@ export class LicenciaEditComponent {
   protected $proyectos = toSignal(inject(ProyectoService).findAll(), { initialValue: [] });
 
   protected $form = signal(new FormGroup({
-    numero: new FormControl<string>('', [Validators.required, Validators.maxLength(50)]),
-    fechaEmision: new FormControl<string>('', [Validators.required]),
+    numero: new FormControl<string>('', [Validators.required, AppValidators.notBlank, Validators.maxLength(50)]),
+    fechaEmision: new FormControl<string>('', [Validators.required, AppValidators.noFutura]),
     fechaVencimiento: new FormControl<string>('', [Validators.required]),
     idProyecto: new FormControl<number | null>(null, [Validators.required])
-  }, { validators: rangoValido }));
+    // Validador de grupo: el vencimiento debe ser posterior a la emisión (igual que el @AssertTrue del DTO)
+  }, { validators: AppValidators.rangoFechas('fechaEmision', 'fechaVencimiento') }));
+
+  protected errorMessage = errorMessage;
 
   private readonly $params = toSignal(this.route.params, { initialValue: {} });
   protected $id = computed(() => this.$params()['id']);

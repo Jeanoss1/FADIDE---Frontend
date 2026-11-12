@@ -1,0 +1,67 @@
+<h2 mat-dialog-title class="dialog-title">
+  <mat-icon>{{ isEdit ? 'edit' : 'apartment' }}</mat-icon>
+  {{ isEdit ? 'Editar obra' : 'Nueva obra' }}
+</h2>
+
+<form [formGroup]="$form()" (submit)="save()">
+  <mat-dialog-content>
+    @if ($error()) {
+      <div class="dialog-error"><mat-icon>error_outline</mat-icon> {{ $error() }}</div>
+    }
+
+    <div class="form-grid">
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Nombre de la obra</mat-label>
+        <input matInput formControlName="nombre" placeholder="Vivienda unifamiliar de dos niveles" cdkFocusInitial />
+        <mat-error>{{ errorMessage($form().controls.nombre, 'El nombre') }}</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Ubicación</mat-label>
+        <input matInput formControlName="ubicacion" placeholder="Distrito, provincia, región" />
+        <mat-error>{{ errorMessage($form().controls.ubicacion, 'La ubicación') }}</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Cliente</mat-label>
+        <mat-select formControlName="idCliente">
+          @for (c of $clientes(); track c.idCliente) {
+            <mat-option [value]="c.idCliente">{{ c.razonSocial }} · {{ c.ruc }}</mat-option>
+          }
+        </mat-select>
+        <mat-error>{{ errorMessage($form().controls.idCliente, 'El cliente') }}</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Estado</mat-label>
+        <mat-select formControlName="estado">
+          @for (e of estados; track e.value) {
+            <mat-option [value]="e.value">{{ e.label }}</mat-option>
+          }
+        </mat-select>
+        <mat-error>{{ errorMessage($form().controls.estado, 'El estado') }}</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Contratistas</mat-label>
+        <mat-select formControlName="idContratistas" multiple>
+          @for (c of $contratistas(); track c.idContratista) {
+            <mat-option [value]="c.idContratista">{{ c.nombre }}</mat-option>
+          }
+        </mat-select>
+        <mat-hint>Opcional: puedes asignar varios contratistas</mat-hint>
+      </mat-form-field>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" mat-dialog-close [disabled]="$saving()">Cancelar</button>
+    <button mat-flat-button class="btn-primary" type="submit" [disabled]="$saving()">
+      @if ($saving()) {
+        <mat-spinner diameter="20"></mat-spinner>
+      } @else {
+        <ng-container><mat-icon>done</mat-icon> {{ isEdit ? 'Actualizar' : 'Guardar' }}</ng-container>
+      }
+    </button>
+  </mat-dialog-actions>
+</form>

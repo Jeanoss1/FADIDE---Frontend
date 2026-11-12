@@ -15,6 +15,7 @@ import { ESTADOS_PENALIDAD } from '../../../model/penalidad';
 import { ContratoService } from '../../../services/contrato.service';
 import { PenalidadService } from '../../../services/penalidad.service';
 import { EstadoLabelPipe } from '../../../shared/estado.pipe';
+import { AppValidators, errorMessage } from '../../../shared/validators';
 
 // El backend solo permite registrar penalidades (GET y POST)
 @Component({
@@ -38,12 +39,14 @@ export class PenalidadEditComponent {
 
   protected estados = ESTADOS_PENALIDAD;
   protected $contratos = toSignal(inject(ContratoService).findAll(), { initialValue: [] });
+  protected errorMessage = errorMessage;
 
   protected $form = signal(new FormGroup({
     idContrato: new FormControl<number | null>(null, [Validators.required]),
-    montoUit: new FormControl<number | null>(null, [Validators.required, Validators.min(0.0001)]),
+    // Igual que el DTO: mayor que cero, hasta 6 enteros y 4 decimales
+    montoUit: new FormControl<number | null>(null, [Validators.required, Validators.min(0.0001), Validators.max(999999.9999)]),
     fechaAplicacion: new FormControl<string>(today(), [Validators.required]),
-    motivo: new FormControl<string>('', [Validators.required, Validators.maxLength(255)]),
+    motivo: new FormControl<string>('', [Validators.required, AppValidators.notBlank, Validators.minLength(5), Validators.maxLength(255)]),
     estado: new FormControl<string>('APLICADA')
   }));
 

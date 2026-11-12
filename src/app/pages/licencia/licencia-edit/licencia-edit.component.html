@@ -5,7 +5,7 @@
     <mat-form-field appearance="outline">
       <mat-label>N° de licencia</mat-label>
       <input matInput formControlName="numero" placeholder="027-2024" />
-      <mat-error>El número es obligatorio</mat-error>
+      <mat-error>{{ errorMessage($form().controls.numero, 'El número') }}</mat-error>
     </mat-form-field>
 
     <mat-form-field appearance="outline">
@@ -21,7 +21,7 @@
     <mat-form-field appearance="outline">
       <mat-label>Fecha de emisión</mat-label>
       <input matInput type="date" formControlName="fechaEmision" />
-      <mat-error>La fecha de emisión es obligatoria</mat-error>
+      <mat-error>{{ errorMessage($form().controls.fechaEmision, 'La fecha de emisión') }}</mat-error>
     </mat-form-field>
 
     <mat-form-field appearance="outline">
@@ -31,8 +31,8 @@
     </mat-form-field>
   </div>
 
-  @if ($form().hasError('rango')) {
-    <p class="auth-error"><mat-icon>error_outline</mat-icon> El vencimiento no puede ser anterior a la emisión.</p>
+  @if ($form().hasError('rangoFechas')) {
+    <p class="auth-error"><mat-icon>error_outline</mat-icon> La fecha de vencimiento debe ser posterior a la fecha de emisión.</p>
   }
 
   <div class="form-actions">
