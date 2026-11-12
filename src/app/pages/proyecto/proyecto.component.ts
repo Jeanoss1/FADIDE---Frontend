@@ -9,14 +9,14 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { RouterLink, RouterOutlet } from '@angular/router';
-import { filter, switchMap, tap } from 'rxjs';
+import { filter, switchMap } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { getErrorMessage } from '../../core/utils/http-error';
 import { Proyecto } from '../../model/proyecto';
 import { ProyectoService } from '../../services/proyecto.service';
 import { openConfirm } from '../../shared/confirm-dialog/confirm-dialog.component';
 import { EstadoClassPipe, EstadoLabelPipe } from '../../shared/estado.pipe';
+import { ProyectoDialogComponent } from './proyecto-dialog/proyecto-dialog.component';
 
 @Component({
   imports: [
@@ -28,8 +28,6 @@ import { EstadoClassPipe, EstadoLabelPipe } from '../../shared/estado.pipe';
     MatSortModule,
     MatTableModule,
     MatTooltipModule,
-    RouterLink,
-    RouterOutlet,
     EstadoClassPipe,
     EstadoLabelPipe
   ],
@@ -91,17 +89,29 @@ export class ProyectoComponent {
     this.$dataSource().filter = filterValue.trim().toLowerCase();
   }
 
+  // Abre el modal: sin obra = registrar, con obra = editar
+  openDialog(proyecto?: Proyecto) {
+    this.dialog.open(ProyectoDialogComponent, {
+      data: proyecto ?? null,
+      width: '720px',
+      maxWidth: '95vw',
+      disableClose: true
+    });
+  }
+
   delete(proyecto: Proyecto) {
     openConfirm(this.dialog, {
       title: 'Eliminar obra',
       message: `¿Seguro que deseas eliminar la obra "${proyecto.nombre}"?`
     }).pipe(
       filter(Boolean),
-      switchMap(() => this.proyectoService.delete(proyecto.idProyecto)),
-      switchMap(() => this.proyectoService.findAll()),
-      tap(data => this.proyectoService.setDataChange(data)),
-      tap(() => this.proyectoService.setMessageChange('Obra eliminada'))
+      switchMap(() => this.proyectoService.delete(proyecto.idProyecto))
     ).subscribe({
+      next: () => {
+        // Mutación silenciosa: se quita la fila del signal sin recargar la lista
+        this.proyectoService.removeLocal(p => p.idProyecto === proyecto.idProyecto);
+        this.proyectoService.setMessageChange('Obra eliminada');
+      },
       error: err => this.snackBar.open(getErrorMessage(err), 'OK', { duration: 4000, panelClass: 'snack-error' })
     });
   }

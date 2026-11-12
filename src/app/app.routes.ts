@@ -6,11 +6,9 @@ import { RegisterComponent } from './pages/public/register/register.component';
 import { LayoutComponent } from './pages/layout/layout.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { ClienteComponent } from './pages/cliente/cliente.component';
-import { ClienteEditComponent } from './pages/cliente/cliente-edit/cliente-edit.component';
 import { ContratistaComponent } from './pages/contratista/contratista.component';
 import { ContratistaEditComponent } from './pages/contratista/contratista-edit/contratista-edit.component';
 import { ProyectoComponent } from './pages/proyecto/proyecto.component';
-import { ProyectoEditComponent } from './pages/proyecto/proyecto-edit/proyecto-edit.component';
 import { LicenciaComponent } from './pages/licencia/licencia.component';
 import { LicenciaEditComponent } from './pages/licencia/licencia-edit/licencia-edit.component';
 import { ContratoComponent } from './pages/contrato/contrato.component';
@@ -45,13 +43,8 @@ export const routes: Routes = [
         children: [
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
             { path: 'dashboard', component: DashboardComponent, title: 'Dashboard | SISCO' },
-            {
-                path: 'cliente', component: ClienteComponent, title: 'Clientes | SISCO',
-                children: [
-                    { path: 'new', component: ClienteEditComponent, data: { roles: GESTION } },
-                    { path: 'edit/:id', component: ClienteEditComponent, data: { roles: GESTION } }
-                ]
-            },
+            // Cliente y Obra: el registro y la edición se hacen en un modal (MatDialog), sin rutas hijas
+            { path: 'cliente', component: ClienteComponent, title: 'Clientes | SISCO' },
             {
                 path: 'contratista', component: ContratistaComponent, title: 'Contratistas | SISCO',
                 children: [
@@ -59,13 +52,7 @@ export const routes: Routes = [
                     { path: 'edit/:id', component: ContratistaEditComponent, data: { roles: GESTION } }
                 ]
             },
-            {
-                path: 'proyecto', component: ProyectoComponent, title: 'Obras | SISCO',
-                children: [
-                    { path: 'new', component: ProyectoEditComponent, data: { roles: GESTION } },
-                    { path: 'edit/:id', component: ProyectoEditComponent, data: { roles: GESTION } }
-                ]
-            },
+            { path: 'proyecto', component: ProyectoComponent, title: 'Obras | SISCO' },
             {
                 path: 'licencia', component: LicenciaComponent, title: 'Licencias | SISCO',
                 children: [

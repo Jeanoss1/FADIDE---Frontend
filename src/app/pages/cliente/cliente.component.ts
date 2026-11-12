@@ -9,13 +9,13 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { RouterLink, RouterOutlet } from '@angular/router';
-import { filter, switchMap, tap } from 'rxjs';
+import { filter, switchMap } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { getErrorMessage } from '../../core/utils/http-error';
 import { Cliente } from '../../model/cliente';
 import { ClienteService } from '../../services/cliente.service';
 import { openConfirm } from '../../shared/confirm-dialog/confirm-dialog.component';
+import { ClienteDialogComponent } from './cliente-dialog/cliente-dialog.component';
 
 @Component({
   imports: [
@@ -26,9 +26,7 @@ import { openConfirm } from '../../shared/confirm-dialog/confirm-dialog.componen
     MatPaginatorModule,
     MatSortModule,
     MatTableModule,
-    MatTooltipModule,
-    RouterLink,
-    RouterOutlet
+    MatTooltipModule
   ],
   selector: 'app-cliente',
   templateUrl: './cliente.component.html',
@@ -51,8 +49,10 @@ export class ClienteComponent {
   });
 
   constructor() {
+    // Única carga completa de la lista; luego los cambios se aplican con mutación silenciosa
     this.clienteService.findAll().subscribe(data => this.clienteService.setDataChange(data));
 
+    // Cada vez que cambia el signal de la lista, la tabla se refresca sola
     effect(() => {
       const ds = this.$dataSource();
       ds.data = this.$clientes();
@@ -74,17 +74,29 @@ export class ClienteComponent {
     this.$dataSource().filter = filterValue.trim().toLowerCase();
   }
 
+  // Abre el modal: sin cliente = registrar, con cliente = editar
+  openDialog(cliente?: Cliente) {
+    this.dialog.open(ClienteDialogComponent, {
+      data: cliente ?? null,
+      width: '640px',
+      maxWidth: '95vw',
+      disableClose: true
+    });
+  }
+
   delete(cliente: Cliente) {
     openConfirm(this.dialog, {
       title: 'Eliminar cliente',
       message: `¿Seguro que deseas eliminar a "${cliente.razonSocial}"? Esta acción no se puede deshacer.`
     }).pipe(
       filter(Boolean),
-      switchMap(() => this.clienteService.delete(cliente.idCliente)),
-      switchMap(() => this.clienteService.findAll()),
-      tap(data => this.clienteService.setDataChange(data)),
-      tap(() => this.clienteService.setMessageChange('Cliente eliminado'))
+      switchMap(() => this.clienteService.delete(cliente.idCliente))
     ).subscribe({
+      next: () => {
+        // Mutación silenciosa: se quita la fila del signal sin volver a consultar al backend
+        this.clienteService.removeLocal(c => c.idCliente === cliente.idCliente);
+        this.clienteService.setMessageChange('Cliente eliminado');
+      },
       error: err => this.snackBar.open(getErrorMessage(err), 'OK', { duration: 4000, panelClass: 'snack-error' })
     });
   }
