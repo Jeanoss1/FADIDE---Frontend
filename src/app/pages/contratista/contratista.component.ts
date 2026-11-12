@@ -10,7 +10,7 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink, RouterOutlet } from '@angular/router';
-import { filter, switchMap, tap } from 'rxjs';
+import { filter, switchMap } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { getErrorMessage } from '../../core/utils/http-error';
 import { Contratista } from '../../model/contratista';
@@ -80,11 +80,13 @@ export class ContratistaComponent {
       message: `¿Seguro que deseas eliminar a "${contratista.nombre}"?`
     }).pipe(
       filter(Boolean),
-      switchMap(() => this.contratistaService.delete(contratista.idContratista)),
-      switchMap(() => this.contratistaService.findAll()),
-      tap(data => this.contratistaService.setDataChange(data)),
-      tap(() => this.contratistaService.setMessageChange('Contratista eliminado'))
+      switchMap(() => this.contratistaService.delete(contratista.idContratista))
     ).subscribe({
+      next: () => {
+        // Mutación silenciosa: se quita la fila del signal sin volver a consultar al backend
+        this.contratistaService.removeLocal(c => c.idContratista === contratista.idContratista);
+        this.contratistaService.setMessageChange('Contratista eliminado');
+      },
       error: err => this.snackBar.open(getErrorMessage(err), 'OK', { duration: 4000, panelClass: 'snack-error' })
     });
   }
