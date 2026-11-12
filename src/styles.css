@@ -428,3 +428,31 @@ a {
 .portal-spacer {
   flex: 1;
 }
+
+/* ---------- Formularios en modal (MatDialog) ---------- */
+.dialog-title {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  border-top: 4px solid var(--fd-orange);
+}
+
+.dialog-title mat-icon {
+  color: var(--fd-orange);
+}
+
+.dialog-error {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fdecea;
+  color: #8a1c13;
+  font-size: 0.9rem;
+}
+
+.mat-mdc-dialog-content .form-grid {
+  padding-top: 6px;
+}
