@@ -5,13 +5,11 @@
       <p>Personas naturales o jurídicas que contratan la supervisión de sus obras.</p>
     </div>
     @if ($canEdit()) {
-      <a mat-flat-button class="btn-primary" routerLink="/pages/cliente/new">
+      <button mat-flat-button class="btn-primary" (click)="openDialog()">
         <mat-icon>add</mat-icon> Nuevo Cliente
-      </a>
+      </button>
     }
   </div>
-
-  <router-outlet></router-outlet>
 
   <div class="table-card">
     <div class="table-toolbar">
@@ -47,7 +45,7 @@
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef class="actions-cell">Acciones</th>
           <td mat-cell *matCellDef="let row" class="actions-cell">
-            <button mat-icon-button [routerLink]="['edit', row.idCliente]" matTooltip="Editar">
+            <button mat-icon-button (click)="openDialog(row)" matTooltip="Editar">
               <mat-icon>edit</mat-icon>
             </button>
             <button mat-icon-button (click)="delete(row)" matTooltip="Eliminar">
