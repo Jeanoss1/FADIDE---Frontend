@@ -7,10 +7,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { switchMap, tap } from 'rxjs';
 import { getErrorMessage } from '../../../core/utils/http-error';
 import { ContratistaService } from '../../../services/contratista.service';
+import { AppValidators, applyServerErrors, errorMessage } from '../../../shared/validators';
 
+// Mantiene el patrón de rutas hijas (new / edit/:id) visto en clase para Category
 @Component({
   imports: [
     ReactiveFormsModule,
@@ -29,9 +30,11 @@ export class ContratistaEditComponent {
   private readonly contratistaService = inject(ContratistaService);
   private readonly snackBar = inject(MatSnackBar);
 
+  protected errorMessage = errorMessage;
+
   protected $form = signal(new FormGroup({
-    nombre: new FormControl<string>('', [Validators.required, Validators.maxLength(150)]),
-    ruc: new FormControl<string>('', [Validators.required, Validators.pattern(/^\d{11}$/)])
+    nombre: new FormControl<string>('', [Validators.required, AppValidators.notBlank, Validators.minLength(3), Validators.maxLength(150)]),
+    ruc: new FormControl<string>('', [Validators.required, AppValidators.ruc])
   }));
 
   private readonly $params = toSignal(this.route.params, { initialValue: {} });
@@ -57,17 +60,28 @@ export class ContratistaEditComponent {
     }
 
     const isEdit = this.$isEdit();
+    const id = Number(this.$id());
+    const body = { nombre: form.value.nombre!.trim(), ruc: form.value.ruc };
     const operation$ = isEdit
-      ? this.contratistaService.update(this.$id(), form.value)
-      : this.contratistaService.save(form.value);
+      ? this.contratistaService.update(id, body)
+      : this.contratistaService.save(body);
 
-    operation$.pipe(
-      switchMap(() => this.contratistaService.findAll()),
-      tap(data => this.contratistaService.setDataChange(data)),
-      tap(() => this.contratistaService.setMessageChange(isEdit ? 'Contratista actualizado' : 'Contratista registrado'))
-    ).subscribe({
-      next: () => this.router.navigate(['/pages/contratista']),
-      error: err => this.snackBar.open(getErrorMessage(err), 'OK', { duration: 4000, panelClass: 'snack-error' })
+    operation$.subscribe({
+      next: saved => {
+        // Mutación silenciosa: se actualiza el signal con el registro devuelto (sin findAll)
+        if (isEdit) {
+          this.contratistaService.replaceLocal(saved, c => c.idContratista === saved.idContratista);
+        } else {
+          this.contratistaService.addLocal(saved);
+        }
+        this.contratistaService.setMessageChange(isEdit ? 'Contratista actualizado' : 'Contratista registrado');
+        this.router.navigate(['/pages/contratista']);
+      },
+      error: err => {
+        if (!applyServerErrors(form, err)) {
+          this.snackBar.open(getErrorMessage(err), 'OK', { duration: 4000, panelClass: 'snack-error' });
+        }
+      }
     });
   }
 }
