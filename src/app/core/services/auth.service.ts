@@ -1,9 +1,9 @@
 import { computed, inject, Service, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { tap } from 'rxjs';
+import { catchError, map, Observable, of, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { LoginRequest, RegisterRequest, Session } from '../../model/auth';
+import { LoginRequest, RegisterRequest, SesionActual, Session } from '../../model/auth';
 import { RolNombre } from '../../model/rol';
 
 const STORAGE_KEY = 'sisco_session';
@@ -22,10 +22,19 @@ export class AuthService {
     private readonly http = inject(HttpClient);
     private readonly router = inject(Router);
     private readonly _session = signal<Session | null>(this.readSession());
+    // true cuando el backend confirmó el token con GET /auth/me
+    private readonly _verified = signal(false);
 
     readonly $session = this._session.asReadonly();
+    readonly $verified = this._verified.asReadonly();
     readonly $isLoggedIn = computed(() => !!this._session());
     readonly $rol = computed(() => this._session()?.rol ?? null);
+    // Fecha de expiración leída del claim "exp" del token
+    readonly $expiresAt = computed(() => {
+        const token = this._session()?.token;
+        const exp = token ? this.readPayload(token)?.exp : null;
+        return exp ? new Date(exp * 1000) : null;
+    });
 
     login(credentials: LoginRequest) {
         return this.http.post<Session>(`${this.url}/login`, credentials).pipe(tap(s => this.saveSession(s)));
@@ -41,9 +50,36 @@ export class AuthService {
             .pipe(tap(s => this.saveSession(s)));
     }
 
+    /**
+     * Comprobante de inicio de sesión: pregunta al backend si el token guardado sigue siendo
+     * válido (firma, expiración y usuario activo). Se ejecuta al iniciar la aplicación.
+     * - 200: actualiza nombre y rol con los datos del servidor (no se confía en localStorage).
+     * - 401: el token fue alterado o expiró; el interceptor cierra la sesión.
+     */
+    verifySession(): Observable<boolean> {
+        if (!this._session()) {
+            return of(false);
+        }
+        return this.http.get<SesionActual>(`${this.url}/me`).pipe(
+            tap(me => {
+                const current = this._session();
+                if (current) {
+                    this.saveSession({ ...current, correo: me.correo, nombreCompleto: me.nombreCompleto, rol: me.rol });
+                }
+                this._verified.set(true);
+            }),
+            map(() => true),
+            // Sin conexión no se bloquea el arranque; el 401 ya lo maneja el interceptor
+            catchError(() => of(false))
+        );
+    }
+
     logout() {
+        // Elimina también la cookie HttpOnly en el servidor (el navegador no puede borrarla)
+        this.http.post(`${this.url}/logout`, {}).subscribe({ error: () => undefined });
         localStorage.removeItem(STORAGE_KEY);
         this._session.set(null);
+        this._verified.set(false);
         this.router.navigate(['/login']);
     }
 
@@ -64,6 +100,7 @@ export class AuthService {
     private saveSession(session: Session) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
         this._session.set(session);
+        this._verified.set(true);
     }
 
     private readSession(): Session | null {
@@ -82,12 +119,17 @@ export class AuthService {
     }
 
     private isExpired(token: string): boolean {
+        const exp = this.readPayload(token)?.exp;
+        return !exp || exp * 1000 < Date.now();
+    }
+
+    // El payload del JWT es Base64URL (no está cifrado): se puede leer, pero solo el backend valida la firma
+    private readPayload(token: string): { exp?: number; sub?: string; rol?: string } | null {
         try {
             const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-            const payload = JSON.parse(atob(base64));
-            return !payload.exp || payload.exp * 1000 < Date.now();
+            return JSON.parse(atob(base64));
         } catch {
-            return true;
+            return null;
         }
     }
 }

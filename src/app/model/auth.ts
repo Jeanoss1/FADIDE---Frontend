@@ -20,3 +20,10 @@ export class Session {
     nombreCompleto: string;
     rol: RolNombre;
 }
+
+// Comprobante de sesión: respuesta de GET /api/auth/me (el backend valida el token)
+export class SesionActual {
+    correo: string;
+    nombreCompleto: string;
+    rol: RolNombre;
+}
