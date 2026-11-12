@@ -22,11 +22,7 @@
                     <mat-label>Correo electrónico</mat-label>
                     <input matInput type="email" formControlName="correo" autocomplete="email" placeholder="usuario@fadide.com" />
                     <mat-icon matPrefix>mail</mat-icon>
-                    @if ($form().controls.correo.hasError('required')) {
-                        <mat-error>El correo es obligatorio</mat-error>
-                    } @else if ($form().controls.correo.hasError('email')) {
-                        <mat-error>El correo no tiene un formato válido</mat-error>
-                    }
+                    <mat-error>{{ errorMessage($form().controls.correo, 'El correo') }}</mat-error>
                 </mat-form-field>
 
                 <mat-form-field appearance="outline">
@@ -37,7 +33,7 @@
                         [attr.aria-label]="$hidePassword() ? 'Mostrar contraseña' : 'Ocultar contraseña'">
                         <mat-icon>{{ $hidePassword() ? 'visibility' : 'visibility_off' }}</mat-icon>
                     </button>
-                    <mat-error>La contraseña es obligatoria</mat-error>
+                    <mat-error>{{ errorMessage($form().controls.password, 'La contraseña') }}</mat-error>
                 </mat-form-field>
 
                 <button mat-flat-button class="btn-primary submit" type="submit" [disabled]="$loading()">

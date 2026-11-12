@@ -10,6 +10,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { getErrorMessage } from '../../../core/utils/http-error';
 import { GoogleButtonComponent } from '../../../shared/google-button/google-button.component';
 import { RegisterRequest } from '../../../model/auth';
+import { AppValidators, errorMessage } from '../../../shared/validators';
 
 // La confirmación debe coincidir con la contraseña
 function passwordsMatch(group: AbstractControl): ValidationErrors | null {
@@ -37,12 +38,15 @@ export class RegisterComponent {
   private readonly router = inject(Router);
 
   protected $form = signal(new FormGroup({
-    nombreCompleto: new FormControl<string>('', [Validators.required, Validators.maxLength(150)]),
-    documento: new FormControl<string>('', [Validators.required, Validators.pattern(/^\d{11}$/)]),
+    nombreCompleto: new FormControl<string>('', [Validators.required, AppValidators.notBlank, Validators.minLength(3), Validators.maxLength(150)]),
+    documento: new FormControl<string>('', [Validators.required, AppValidators.ruc]),
     correo: new FormControl<string>('', [Validators.required, Validators.email, Validators.maxLength(100)]),
-    password: new FormControl<string>('', [Validators.required, Validators.minLength(8), Validators.maxLength(72)]),
+    password: new FormControl<string>('', [Validators.required, Validators.minLength(8), Validators.maxLength(72), AppValidators.passwordSegura]),
     confirmPassword: new FormControl<string>('', [Validators.required])
   }, { validators: passwordsMatch }));
+
+  // Mensaje del primer error de cada campo (validación del lado del frontend)
+  protected errorMessage = errorMessage;
 
   protected $hidePassword = signal(true);
   protected $loading = signal(false);
@@ -58,7 +62,8 @@ export class RegisterComponent {
     this.$loading.set(true);
     this.$error.set('');
 
-    const { confirmPassword, ...data } = form.getRawValue();
+    const { confirmPassword, ...raw } = form.getRawValue();
+    const data = { ...raw, nombreCompleto: raw.nombreCompleto.trim(), correo: raw.correo.trim().toLowerCase() };
 
     // El backend guarda el usuario en la BD con rol CLIENTE y devuelve la sesión iniciada
     this.authService.register(data as RegisterRequest).subscribe({
