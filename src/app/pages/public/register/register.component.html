@@ -27,21 +27,21 @@
                     <mat-label>Nombre completo o razón social</mat-label>
                     <input matInput formControlName="nombreCompleto" autocomplete="name" />
                     <mat-icon matPrefix>person</mat-icon>
-                    <mat-error>El nombre es obligatorio</mat-error>
+                    <mat-error>{{ errorMessage($form().controls.nombreCompleto, 'El nombre') }}</mat-error>
                 </mat-form-field>
 
                 <mat-form-field appearance="outline">
                     <mat-label>RUC</mat-label>
                     <input matInput formControlName="documento" maxlength="11" inputmode="numeric" placeholder="20XXXXXXXXX" />
                     <mat-icon matPrefix>badge</mat-icon>
-                    <mat-error>El RUC debe tener 11 dígitos</mat-error>
+                    <mat-error>{{ errorMessage($form().controls.documento, 'El RUC') }}</mat-error>
                 </mat-form-field>
 
                 <mat-form-field appearance="outline">
                     <mat-label>Correo electrónico</mat-label>
                     <input matInput type="email" formControlName="correo" autocomplete="email" />
                     <mat-icon matPrefix>mail</mat-icon>
-                    <mat-error>Ingresa un correo válido</mat-error>
+                    <mat-error>{{ errorMessage($form().controls.correo, 'El correo') }}</mat-error>
                 </mat-form-field>
 
                 <mat-form-field appearance="outline">
@@ -52,8 +52,8 @@
                         [attr.aria-label]="$hidePassword() ? 'Mostrar contraseña' : 'Ocultar contraseña'">
                         <mat-icon>{{ $hidePassword() ? 'visibility' : 'visibility_off' }}</mat-icon>
                     </button>
-                    <mat-hint>Mínimo 8 caracteres</mat-hint>
-                    <mat-error>La contraseña debe tener entre 8 y 72 caracteres</mat-error>
+                    <mat-hint>Mínimo 8 caracteres, con mayúsculas, minúsculas y números</mat-hint>
+                    <mat-error>{{ errorMessage($form().controls.password, 'La contraseña') }}</mat-error>
                 </mat-form-field>
 
                 <mat-form-field appearance="outline">
