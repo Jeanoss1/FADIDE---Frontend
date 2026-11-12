@@ -10,6 +10,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { getErrorMessage } from '../../../core/utils/http-error';
 import { GoogleButtonComponent } from '../../../shared/google-button/google-button.component';
 import { LoginRequest } from '../../../model/auth';
+import { AppValidators, errorMessage } from '../../../shared/validators';
 
 @Component({
   imports: [
@@ -31,9 +32,12 @@ export class LoginComponent {
   private readonly route = inject(ActivatedRoute);
 
   protected $form = signal(new FormGroup({
-    correo: new FormControl<string>('', [Validators.required, Validators.email]),
-    password: new FormControl<string>('', [Validators.required])
+    correo: new FormControl<string>('', [Validators.required, AppValidators.notBlank, Validators.email, Validators.maxLength(100)]),
+    password: new FormControl<string>('', [Validators.required, Validators.minLength(6), Validators.maxLength(72)])
   }));
+
+  // Mensaje del primer error de cada campo (validación del lado del frontend)
+  protected errorMessage = errorMessage;
 
   protected $hidePassword = signal(true);
   protected $loading = signal(false);
@@ -49,7 +53,12 @@ export class LoginComponent {
     this.$loading.set(true);
     this.$error.set('');
 
-    this.authService.login(form.value as LoginRequest).subscribe({
+    const credentials: LoginRequest = {
+      correo: form.value.correo!.trim().toLowerCase(),
+      password: form.value.password!
+    };
+
+    this.authService.login(credentials).subscribe({
       next: () => {
         const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
         this.router.navigateByUrl(returnUrl || this.authService.homeUrl());

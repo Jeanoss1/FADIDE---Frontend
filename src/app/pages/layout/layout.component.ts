@@ -1,3 +1,4 @@
+import { DatePipe } from '@angular/common';
 import { Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { BreakpointObserver } from '@angular/cdk/layout';
@@ -57,6 +58,7 @@ const MENU: MenuSection[] = [
 
 @Component({
   imports: [
+    DatePipe,
     MatButtonModule,
     MatIconModule,
     MatSidenavModule,
@@ -75,6 +77,9 @@ export class LayoutComponent {
   private readonly breakpoint = inject(BreakpointObserver);
 
   protected $session = this.authService.$session;
+  // Comprobante de sesión: true cuando el backend confirmó el token; y su fecha de expiración
+  protected $verified = this.authService.$verified;
+  protected $expiresAt = this.authService.$expiresAt;
   protected $isMobile = toSignal(
     this.breakpoint.observe('(max-width: 960px)').pipe(map(r => r.matches)),
     { initialValue: false }

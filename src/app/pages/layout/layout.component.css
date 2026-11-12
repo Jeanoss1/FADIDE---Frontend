@@ -125,6 +125,31 @@ nav {
     flex: 1;
 }
 
+/* ---------- Comprobante de sesión ---------- */
+.session-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #166534;
+    background: #dcfce7;
+    cursor: default;
+}
+
+.session-chip mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+}
+
+.session-chip.pending {
+    color: #92400e;
+    background: #fef3c7;
+}
+
 .logout {
     color: var(--fd-danger) !important;
     border-color: var(--fd-danger) !important;
@@ -136,6 +161,7 @@ nav {
     }
 
     .logout span,
+    .session-chip span,
     .user small {
         display: none;
     }

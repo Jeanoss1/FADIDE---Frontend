@@ -36,6 +36,13 @@
 
             <span class="spacer"></span>
 
+            <!-- Comprobante de inicio de sesión: el backend validó el token con GET /api/auth/me -->
+            <span class="session-chip" [class.pending]="!$verified()"
+                [matTooltip]="$verified() ? 'Token validado por el servidor. Expira el ' + ($expiresAt() | date:'dd/MM/yyyy HH:mm') : 'Validando la sesión con el servidor...'">
+                <mat-icon>{{ $verified() ? 'verified_user' : 'hourglass_top' }}</mat-icon>
+                <span>{{ $verified() ? 'Sesión verificada' : 'Verificando...' }}</span>
+            </span>
+
             <button mat-stroked-button class="logout" (click)="logout()">
                 <mat-icon>logout</mat-icon>
                 <span>Cerrar sesión</span>

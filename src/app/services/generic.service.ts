@@ -39,4 +39,24 @@ export abstract class GenericService<T> {
     setMessageChange(msg: string) {
         this._message.set(msg);
     }
+
+    // ---------- Mutación silenciosa ----------
+    // En lugar de volver a pedir toda la lista (findAll) tras guardar o eliminar, se modifica
+    // el signal con la respuesta del backend. La tabla se actualiza sola, sin recargar la
+    // página, sin una segunda petición HTTP y sin perder el filtro, el orden ni la página actual.
+
+    // POST correcto: agrega el registro devuelto por el backend al inicio de la lista
+    addLocal(item: T) {
+        this._data.update(list => [item, ...list]);
+    }
+
+    // PUT correcto: reemplaza solo el registro editado
+    replaceLocal(item: T, isSame: (current: T) => boolean) {
+        this._data.update(list => list.map(current => isSame(current) ? item : current));
+    }
+
+    // DELETE correcto (204): quita el registro de la lista
+    removeLocal(isSame: (current: T) => boolean) {
+        this._data.update(list => list.filter(current => !isSame(current)));
+    }
 }
