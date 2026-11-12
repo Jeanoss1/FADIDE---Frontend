@@ -16,6 +16,7 @@ import { ESTADOS_PAGO } from '../../../model/pago';
 import { ContratoService } from '../../../services/contrato.service';
 import { PagoService } from '../../../services/pago.service';
 import { EstadoLabelPipe } from '../../../shared/estado.pipe';
+import { errorMessage } from '../../../shared/validators';
 
 // El backend solo permite registrar pagos (GET y POST)
 @Component({
@@ -40,10 +41,13 @@ export class PagoEditComponent {
 
   protected estados = ESTADOS_PAGO;
   protected $contratos = toSignal(inject(ContratoService).findAll(), { initialValue: [] });
+  protected errorMessage = errorMessage;
 
   protected $form = signal(new FormGroup({
     idContrato: new FormControl<number | null>(null, [Validators.required]),
-    monto: new FormControl<number | null>(null, [Validators.required, Validators.min(0.01)]),
+    // Igual que el DTO: mayor que cero y hasta 10 enteros con 2 decimales
+    monto: new FormControl<number | null>(null, [Validators.required, Validators.min(0.01), Validators.max(9999999999.99),
+      Validators.pattern(/^\d+(\.\d{1,2})?$/)]),
     fechaPago: new FormControl<string>(today(), [Validators.required]),
     estado: new FormControl<string>('REGISTRADO'),
     conformidadEmitida: new FormControl<boolean>(false)
