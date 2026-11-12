@@ -1,0 +1,50 @@
+<h2 mat-dialog-title class="dialog-title">
+  <mat-icon>{{ isEdit ? 'edit' : 'person_add' }}</mat-icon>
+  {{ isEdit ? 'Editar cliente' : 'Nuevo cliente' }}
+</h2>
+
+<form [formGroup]="$form()" (submit)="save()">
+  <mat-dialog-content>
+    @if ($error()) {
+      <div class="dialog-error"><mat-icon>error_outline</mat-icon> {{ $error() }}</div>
+    }
+
+    <div class="form-grid">
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Razón social / Nombre</mat-label>
+        <input matInput formControlName="razonSocial" cdkFocusInitial />
+        <mat-error>{{ errorMessage($form().controls.razonSocial, 'La razón social') }}</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>RUC</mat-label>
+        <input matInput formControlName="ruc" maxlength="11" inputmode="numeric" placeholder="20XXXXXXXXX" />
+        <mat-hint align="end">{{ $form().controls.ruc.value?.length || 0 }}/11</mat-hint>
+        <mat-error>{{ errorMessage($form().controls.ruc, 'El RUC') }}</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Teléfono</mat-label>
+        <input matInput formControlName="telefono" maxlength="9" inputmode="numeric" placeholder="9XXXXXXXX" />
+        <mat-error>{{ errorMessage($form().controls.telefono, 'El teléfono') }}</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Dirección</mat-label>
+        <input matInput formControlName="direccion" />
+        <mat-error>{{ errorMessage($form().controls.direccion, 'La dirección') }}</mat-error>
+      </mat-form-field>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" mat-dialog-close [disabled]="$saving()">Cancelar</button>
+    <button mat-flat-button class="btn-primary" type="submit" [disabled]="$saving()">
+      @if ($saving()) {
+        <mat-spinner diameter="20"></mat-spinner>
+      } @else {
+        <ng-container><mat-icon>done</mat-icon> {{ isEdit ? 'Actualizar' : 'Guardar' }}</ng-container>
+      }
+    </button>
+  </mat-dialog-actions>
+</form>
