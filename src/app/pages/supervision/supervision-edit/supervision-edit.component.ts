@@ -9,7 +9,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { switchMap, tap } from 'rxjs';
+import { tap } from 'rxjs';
 import { today } from '../../../core/utils/dates';
 import { getErrorMessage } from '../../../core/utils/http-error';
 import { ContratoService } from '../../../services/contrato.service';
@@ -77,8 +77,8 @@ export class SupervisionEditComponent {
       : this.supervisionService.save(form.value);
 
     operation$.pipe(
-      switchMap(() => this.supervisionService.findAll()),
-      tap(data => this.supervisionService.setDataChange(data)),
+      // Escenario con recarga: el listado vuelve a pedir su página actual al backend
+      tap(() => this.supervisionService.requestReload()),
       tap(() => this.supervisionService.setMessageChange(isEdit ? 'Avance actualizado' : 'Avance registrado'))
     ).subscribe({
       next: () => this.router.navigate(['/pages/supervision']),

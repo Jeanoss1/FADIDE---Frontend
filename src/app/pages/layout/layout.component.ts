@@ -30,7 +30,10 @@ const ALL: RolNombre[] = ['ADMIN', 'GESTOR', 'SUPERVISOR'];
 const MENU: MenuSection[] = [
   {
     title: 'General',
-    items: [{ label: 'Dashboard', icon: 'space_dashboard', route: '/pages/dashboard', roles: ALL }],
+    items: [
+      { label: 'Dashboard', icon: 'space_dashboard', route: '/pages/dashboard', roles: ALL },
+      { label: 'Reportes', icon: 'summarize', route: '/pages/reporte', roles: ALL },
+    ],
   },
   {
     title: 'Entidades',

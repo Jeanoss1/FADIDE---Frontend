@@ -25,6 +25,7 @@ import { UsuarioComponent } from './pages/usuario/usuario.component';
 import { UsuarioEditComponent } from './pages/usuario/usuario-edit/usuario-edit.component';
 import { ForbiddenComponent } from './pages/forbidden/forbidden.component';
 import { MiObraComponent } from './pages/portal/mi-obra/mi-obra.component';
+import { ReporteComponent } from './pages/reporte/reporte.component';
 
 const STAFF = ['ADMIN', 'GESTOR', 'SUPERVISOR'];
 const GESTION = ['ADMIN', 'GESTOR'];
@@ -93,6 +94,7 @@ export const routes: Routes = [
                     { path: 'new', component: UsuarioEditComponent }
                 ]
             },
+            { path: 'reporte', component: ReporteComponent, title: 'Reportes | SISCO' },
             { path: 'forbidden', component: ForbiddenComponent, title: 'Acceso denegado | SISCO' },
         ]
     },

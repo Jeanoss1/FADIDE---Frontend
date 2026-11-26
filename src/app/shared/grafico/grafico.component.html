@@ -1,0 +1,63 @@
+<figure class="grafico" [attr.aria-label]="$resumen()">
+  <figcaption class="grafico-titulo">{{ grafico().titulo }}</figcaption>
+
+  @if ($vacio()) {
+    <p class="grafico-vacio">Aún no hay datos para mostrar.</p>
+  } @else {
+    @switch (grafico().tipo) {
+      @case ('COLUMNAS') {
+        <div class="columnas" aria-hidden="true">
+          <div class="eje">
+            <span>{{ $maximo() | valor: grafico().formato : true }}</span>
+            <span>{{ $maximo() / 2 | valor: grafico().formato : true }}</span>
+            <span>0</span>
+          </div>
+          <div class="area">
+            <div class="guia guia-max"></div>
+            <div class="guia guia-mitad"></div>
+            @for (d of $datos(); track d.etiqueta) {
+              <div class="slot" tabindex="0"
+                   [matTooltip]="d.etiqueta + ': ' + (d.valor | valor: grafico().formato)" matTooltipPosition="above">
+                <div class="columna" [style.height.%]="porcentaje(d.valor)"></div>
+                <span class="etiqueta-x">{{ d.etiqueta }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+      @case ('BARRAS') {
+        <ul class="barras">
+          @for (d of $datos(); track d.etiqueta) {
+            <li tabindex="0" [matTooltip]="d.etiqueta + ': ' + (d.valor | valor: grafico().formato)">
+              <span class="nombre">{{ d.etiqueta }}</span>
+              <span class="pista"><span class="barra" [style.width.%]="porcentaje(d.valor)"></span></span>
+              <span class="cifra">{{ d.valor | valor: grafico().formato }}</span>
+            </li>
+          }
+        </ul>
+      }
+      @case ('MEDIDORES') {
+        <ul class="medidores">
+          @for (d of $datos(); track d.etiqueta) {
+            <li tabindex="0" [matTooltip]="d.etiqueta + ': ' + (d.valor | valor: grafico().formato) + ' de avance'">
+              <div class="fila"><span class="nombre">{{ d.etiqueta }}</span><span class="cifra">{{ d.valor | valor: grafico().formato }}</span></div>
+              <span class="pista"><span class="barra" [style.width.%]="porcentaje(d.valor)"></span></span>
+            </li>
+          }
+        </ul>
+      }
+    }
+
+    <details class="grafico-tabla">
+      <summary>Ver como tabla</summary>
+      <table>
+        <thead><tr><th scope="col">Categoría</th><th scope="col">Valor</th></tr></thead>
+        <tbody>
+          @for (d of $datos(); track d.etiqueta) {
+            <tr><td>{{ d.etiqueta }}</td><td>{{ d.valor | valor: grafico().formato }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </details>
+  }
+</figure>

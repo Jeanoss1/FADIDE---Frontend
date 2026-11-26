@@ -1,22 +1,25 @@
-import { Component, computed, effect, inject, signal, untracked, viewChild } from '@angular/core';
+import { Component, computed, effect, inject, untracked } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatSort, MatSortModule } from '@angular/material/sort';
-import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatSortModule } from '@angular/material/sort';
+import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { filter, switchMap } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { getErrorMessage } from '../../core/utils/http-error';
-import { Proyecto } from '../../model/proyecto';
+import { ESTADOS_PROYECTO, Proyecto } from '../../model/proyecto';
 import { ProyectoService } from '../../services/proyecto.service';
 import { openConfirm } from '../../shared/confirm-dialog/confirm-dialog.component';
 import { EstadoClassPipe, EstadoLabelPipe } from '../../shared/estado.pipe';
 import { ProyectoDialogComponent } from './proyecto-dialog/proyecto-dialog.component';
+import { PagedList } from '../../shared/paged-list';
+import { FiltrosListadoComponent, SelectFiltro } from '../../shared/filtros-listado/filtros-listado.component';
 
 @Component({
   imports: [
@@ -25,6 +28,8 @@ import { ProyectoDialogComponent } from './proyecto-dialog/proyecto-dialog.compo
     MatIconModule,
     MatInputModule,
     MatPaginatorModule,
+    MatProgressBarModule,
+    FiltrosListadoComponent,
     MatSortModule,
     MatTableModule,
     MatTooltipModule,
@@ -36,13 +41,12 @@ import { ProyectoDialogComponent } from './proyecto-dialog/proyecto-dialog.compo
 })
 export class ProyectoComponent {
   private readonly proyectoService = inject(ProyectoService);
+  // Paginación, búsqueda, filtros y orden en el servidor
+  protected readonly list = new PagedList(this.proyectoService, { sort: 'nombre,asc', sortMap: { cliente: 'cliente.razonSocial' } });
+  protected readonly filtros: SelectFiltro[] = [{ key: 'estado', label: 'Estado', options: ESTADOS_PROYECTO }];
   private readonly authService = inject(AuthService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly dialog = inject(MatDialog);
-
-  protected $dataSource = signal(this.createDataSource());
-  protected $paginator = viewChild(MatPaginator);
-  protected $sort = viewChild(MatSort);
 
   protected $proyectos = this.proyectoService.$dataChange;
   protected $canEdit = computed(() => this.authService.hasRole('ADMIN', 'GESTOR'));
@@ -52,15 +56,6 @@ export class ProyectoComponent {
   });
 
   constructor() {
-    this.proyectoService.findAll().subscribe(data => this.proyectoService.setDataChange(data));
-
-    effect(() => {
-      const ds = this.$dataSource();
-      ds.data = this.$proyectos();
-      ds.paginator = this.$paginator();
-      ds.sort = this.$sort();
-    });
-
     effect(() => {
       const message = this.proyectoService.$messageChange();
       if (message) {
@@ -70,23 +65,8 @@ export class ProyectoComponent {
     });
   }
 
-  // El proyecto trae objetos anidados (cliente, contratistas): se aplanan para filtrar y ordenar
-  private createDataSource() {
-    const ds = new MatTableDataSource<Proyecto>();
-    ds.filterPredicate = (p, f) =>
-      [p.nombre, p.ubicacion, p.estado, p.cliente?.razonSocial, ...(p.contratistas ?? []).map(c => c.nombre)]
-        .join(' ').toLowerCase().includes(f);
-    ds.sortingDataAccessor = (p, col) => col === 'cliente' ? p.cliente?.razonSocial : (p as any)[col];
-    return ds;
-  }
-
   contratistasText(p: Proyecto): string {
     return (p.contratistas ?? []).map(c => c.nombre).join(', ') || '—';
-  }
-
-  applyFilter(e: Event) {
-    const filterValue = (e.target as HTMLInputElement).value;
-    this.$dataSource().filter = filterValue.trim().toLowerCase();
   }
 
   // Abre el modal: sin obra = registrar, con obra = editar

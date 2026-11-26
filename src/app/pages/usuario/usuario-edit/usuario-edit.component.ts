@@ -8,7 +8,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router, RouterLink } from '@angular/router';
-import { switchMap, tap } from 'rxjs';
+import { tap } from 'rxjs';
 import { ROL_LABEL } from '../../../core/services/auth.service';
 import { getErrorMessage } from '../../../core/utils/http-error';
 import { UsuarioRequest } from '../../../model/usuario';
@@ -54,8 +54,8 @@ export class UsuarioEditComponent {
     }
 
     this.usuarioService.save(form.value as UsuarioRequest).pipe(
-      switchMap(() => this.usuarioService.findAll()),
-      tap(data => this.usuarioService.setDataChange(data)),
+      // Escenario con recarga: el listado vuelve a pedir su página actual al backend
+      tap(() => this.usuarioService.requestReload()),
       tap(() => this.usuarioService.setMessageChange('Usuario creado'))
     ).subscribe({
       next: () => this.router.navigate(['/pages/usuario']),
