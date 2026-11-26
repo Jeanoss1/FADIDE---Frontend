@@ -8,7 +8,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router, RouterLink } from '@angular/router';
-import { switchMap, tap } from 'rxjs';
+import { tap } from 'rxjs';
 import { today } from '../../../core/utils/dates';
 import { getErrorMessage } from '../../../core/utils/http-error';
 import { ESTADOS_PENALIDAD } from '../../../model/penalidad';
@@ -58,8 +58,8 @@ export class PenalidadEditComponent {
     }
 
     this.penalidadService.save(form.value).pipe(
-      switchMap(() => this.penalidadService.findAll()),
-      tap(data => this.penalidadService.setDataChange(data)),
+      // Escenario con recarga: el listado vuelve a pedir su página actual al backend
+      tap(() => this.penalidadService.requestReload()),
       tap(() => this.penalidadService.setMessageChange('Penalidad aplicada'))
     ).subscribe({
       next: () => this.router.navigate(['/pages/penalidad']),

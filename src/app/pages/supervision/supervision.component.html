@@ -17,13 +17,20 @@
     <div class="table-toolbar">
       <mat-form-field appearance="outline" subscriptSizing="dynamic">
         <mat-label>Buscar</mat-label>
-        <input matInput (keyup)="applyFilter($event)" placeholder="Contrato o descripción" #input />
+        <input matInput (input)="list.search($any($event.target).value)" placeholder="N° contrato, obra u observación" #input />
         <mat-icon matSuffix>search</mat-icon>
       </mat-form-field>
+      <app-filtros-listado [list]="list" fechas="Registro"></app-filtros-listado>
     </div>
 
+    @if (list.$loading()) {
+
+      <mat-progress-bar mode="indeterminate" aria-label="Cargando registros"></mat-progress-bar>
+
+    }
+
     <div class="table-scroll">
-      <table mat-table [dataSource]="$dataSource()" matSort>
+      <table mat-table [dataSource]="list.$rows()" matSort (matSortChange)="list.onSort($event)">
         <ng-container matColumnDef="fecha">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha</th>
           <td mat-cell *matCellDef="let row">{{ row.fecha | date: 'dd/MM/yyyy' }}</td>
@@ -75,6 +82,7 @@
       </table>
     </div>
 
-    <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Seleccionar página de supervisiones"></mat-paginator>
+    <mat-paginator [length]="list.$total()" [pageIndex]="list.page" [pageSize]="list.size"
+                   [pageSizeOptions]="[5, 10, 25, 100]" (page)="list.onPage($event)" aria-label="Seleccionar página de supervisiones"></mat-paginator>
   </div>
 </div>
