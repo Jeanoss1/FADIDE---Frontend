@@ -1,13 +1,14 @@
-import { Component, computed, effect, inject, signal, untracked, viewChild } from '@angular/core';
+import { Component, computed, effect, inject, untracked } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatSort, MatSortModule } from '@angular/material/sort';
-import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatSortModule } from '@angular/material/sort';
+import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { filter, switchMap } from 'rxjs';
@@ -16,6 +17,7 @@ import { getErrorMessage } from '../../core/utils/http-error';
 import { Contratista } from '../../model/contratista';
 import { ContratistaService } from '../../services/contratista.service';
 import { openConfirm } from '../../shared/confirm-dialog/confirm-dialog.component';
+import { PagedList } from '../../shared/paged-list';
 
 @Component({
   imports: [
@@ -24,6 +26,7 @@ import { openConfirm } from '../../shared/confirm-dialog/confirm-dialog.componen
     MatIconModule,
     MatInputModule,
     MatPaginatorModule,
+    MatProgressBarModule,
     MatSortModule,
     MatTableModule,
     MatTooltipModule,
@@ -35,13 +38,11 @@ import { openConfirm } from '../../shared/confirm-dialog/confirm-dialog.componen
 })
 export class ContratistaComponent {
   private readonly contratistaService = inject(ContratistaService);
+  // Paginación, búsqueda, filtros y orden en el servidor
+  protected readonly list = new PagedList(this.contratistaService, { sort: 'nombre,asc' });
   private readonly authService = inject(AuthService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly dialog = inject(MatDialog);
-
-  protected $dataSource = signal(new MatTableDataSource<Contratista>());
-  protected $paginator = viewChild(MatPaginator);
-  protected $sort = viewChild(MatSort);
 
   protected $contratistas = this.contratistaService.$dataChange;
   protected $canEdit = computed(() => this.authService.hasRole('ADMIN', 'GESTOR'));
@@ -51,15 +52,6 @@ export class ContratistaComponent {
   });
 
   constructor() {
-    this.contratistaService.findAll().subscribe(data => this.contratistaService.setDataChange(data));
-
-    effect(() => {
-      const ds = this.$dataSource();
-      ds.data = this.$contratistas();
-      ds.paginator = this.$paginator();
-      ds.sort = this.$sort();
-    });
-
     effect(() => {
       const message = this.contratistaService.$messageChange();
       if (message) {
@@ -67,11 +59,6 @@ export class ContratistaComponent {
         untracked(() => this.contratistaService.setMessageChange(''));
       }
     });
-  }
-
-  applyFilter(e: Event) {
-    const filterValue = (e.target as HTMLInputElement).value;
-    this.$dataSource().filter = filterValue.trim().toLowerCase();
   }
 
   delete(contratista: Contratista) {
