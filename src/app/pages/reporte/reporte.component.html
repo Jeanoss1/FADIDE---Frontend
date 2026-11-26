@@ -1,0 +1,116 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>Reportes</h1>
+      <p>Filtra la información y descárgala en PDF o Excel.</p>
+    </div>
+  </div>
+
+  <div class="reporte-tipos" role="radiogroup" aria-label="Tipo de reporte">
+    @for (r of reportes; track r.tipo) {
+      <button type="button" class="card reporte-tipo" role="radio"
+              [class.activo]="r.tipo === $definicion().tipo" [attr.aria-checked]="r.tipo === $definicion().tipo"
+              (click)="seleccionar(r)">
+        <mat-icon aria-hidden="true">{{ r.icono }}</mat-icon>
+        <span><strong>{{ r.nombre }}</strong><small>{{ r.descripcion }}</small></span>
+      </button>
+    }
+  </div>
+
+  <div class="table-card">
+    <form class="table-toolbar" (submit)="$event.preventDefault(); generar()">
+      @if ($definicion().fechas; as campo) {
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="filtro">
+          <mat-label>{{ campo }} desde</mat-label>
+          <input matInput type="date" [value]="valor('desde') ?? ''" (change)="filtro('desde', $any($event.target).value)" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="filtro">
+          <mat-label>{{ campo }} hasta</mat-label>
+          <input matInput type="date" [value]="valor('hasta') ?? ''" (change)="filtro('hasta', $any($event.target).value)" />
+        </mat-form-field>
+      }
+      @if ($definicion().estados; as estados) {
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="filtro">
+          <mat-label>Estado</mat-label>
+          <mat-select [value]="valor('estado')" (selectionChange)="filtro('estado', $event.value)">
+            <mat-option [value]="null">Todos</mat-option>
+            @for (e of estados; track e.value) {
+              <mat-option [value]="e.value">{{ e.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      }
+      @if ($definicion().porObra) {
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="filtro">
+          <mat-label>Obra</mat-label>
+          <mat-select [value]="valor('idProyecto')" (selectionChange)="filtro('idProyecto', $event.value)">
+            <mat-option [value]="null">Todas</mat-option>
+            @for (o of $obras(); track o.idProyecto) {
+              <mat-option [value]="o.idProyecto">{{ o.nombre }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      }
+      @if ($definicion().porSupervisor) {
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="filtro">
+          <mat-label>Supervisor</mat-label>
+          <mat-select [value]="valor('idUsuario')" (selectionChange)="filtro('idUsuario', $event.value)">
+            <mat-option [value]="null">Todos</mat-option>
+            @for (s of $supervisores(); track s.id) {
+              <mat-option [value]="s.id">{{ s.nombre }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      }
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="filtro">
+        <mat-label>Buscar</mat-label>
+        <input matInput [value]="valor('q') ?? ''" (input)="filtro('q', $any($event.target).value)" placeholder="Texto libre" />
+      </mat-form-field>
+
+      <button mat-flat-button class="btn-primary" type="submit"><mat-icon>search</mat-icon> Generar</button>
+      <button mat-stroked-button type="button" (click)="limpiar()"><mat-icon>filter_alt_off</mat-icon> Limpiar</button>
+      <span class="toolbar-espacio"></span>
+      <button mat-stroked-button type="button" (click)="exportar('pdf')" [disabled]="$descargando() !== null">
+        <mat-icon>picture_as_pdf</mat-icon> {{ $descargando() === 'pdf' ? 'Generando…' : 'PDF' }}
+      </button>
+      <button mat-stroked-button type="button" (click)="exportar('excel')" [disabled]="$descargando() !== null">
+        <mat-icon>table_view</mat-icon> {{ $descargando() === 'excel' ? 'Generando…' : 'Excel' }}
+      </button>
+    </form>
+
+    @if ($cargando()) {
+      <mat-progress-bar mode="indeterminate" aria-label="Generando reporte"></mat-progress-bar>
+    }
+
+    @if ($reporte(); as r) {
+      <div class="reporte-resumen">
+        <strong>{{ r.titulo }}</strong>
+        <span>{{ r.filtros }} · {{ r.filas.length }} registro(s)</span>
+      </div>
+
+      <div class="table-scroll">
+        <table mat-table [dataSource]="$dataSource">
+          @for (col of r.columnas; track $index; let i = $index) {
+            <ng-container [matColumnDef]="'c' + i">
+              <th mat-header-cell *matHeaderCellDef [class.num]="esNumerica(i)">{{ col }}</th>
+              <td mat-cell *matCellDef="let fila" [class.num]="esNumerica(i)">{{ fila[i] }}</td>
+              <td mat-footer-cell *matFooterCellDef [class.num]="esNumerica(i)">{{ r.totales?.[i] }}</td>
+            </ng-container>
+          }
+
+          <tr mat-header-row *matHeaderRowDef="$columnas()"></tr>
+          <tr mat-row *matRowDef="let row; columns: $columnas()"></tr>
+          @if (r.totales && r.filas.length) {
+            <tr mat-footer-row *matFooterRowDef="$columnas()" class="fila-total"></tr>
+          }
+
+          <tr class="mat-row" *matNoDataRow>
+            <td class="no-data" [attr.colspan]="$columnas().length">No hay registros para los filtros seleccionados</td>
+          </tr>
+        </table>
+      </div>
+    }
+
+    <mat-paginator [pageSizeOptions]="[10, 25, 50, 100]" aria-label="Seleccionar página del reporte"></mat-paginator>
+  </div>
+</div>
