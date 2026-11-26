@@ -1,0 +1,19 @@
+# Apache HTTP Server: las rutas de Angular (/login, /pages/cliente...) no existen como archivos.
+# Si el archivo o carpeta pedido no existe, se responde con index.html y el router de Angular
+# muestra la pantalla correcta; así recargar la página (F5) no devuelve 404.
+# Requiere mod_rewrite y "AllowOverride All" en el directorio publicado.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /index.html [L]
+</IfModule>
+
+# Cabeceras de seguridad básicas para el frontend
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
