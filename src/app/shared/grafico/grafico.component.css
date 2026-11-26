@@ -1,0 +1,209 @@
+:host {
+  display: block;
+  /* Una sola serie en el naranja de marca (contraste >= 3:1 sobre blanco, validado) */
+  --serie: #e06b0a;
+  --serie-hover: #b85708;
+  --pista: #f1ece6;
+  --guia: #eceef1;
+}
+
+.grafico {
+  margin: 0;
+}
+
+.grafico-titulo {
+  font-weight: 600;
+  color: var(--fd-text);
+  margin-bottom: 14px;
+}
+
+.grafico-vacio {
+  color: var(--fd-muted);
+  padding: 32px 0;
+  text-align: center;
+}
+
+/* ---------- Columnas ---------- */
+.columnas {
+  display: flex;
+  gap: 8px;
+  height: 200px;
+}
+
+.eje {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--fd-muted);
+  text-align: right;
+  min-width: 56px;
+  padding-bottom: 22px;
+  transform: translateY(-6px);
+}
+
+.area {
+  position: relative;
+  flex: 1;
+  display: flex;
+  gap: 2px;
+  border-bottom: 1px solid #c9ccd1;
+  margin-bottom: 22px;
+}
+
+.guia {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px solid var(--guia);
+}
+
+.guia-max { top: 0; }
+.guia-mitad { top: 50%; }
+
+.slot {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  outline: none;
+  cursor: default;
+}
+
+.columna {
+  width: min(36px, 70%);
+  background: var(--serie);
+  border-radius: 4px 4px 0 0;
+  transition: height 0.4s ease, background-color 0.15s;
+}
+
+.slot:hover .columna,
+.slot:focus-visible .columna {
+  background: var(--serie-hover);
+}
+
+.slot:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--fd-info);
+  border-radius: 4px;
+}
+
+.etiqueta-x {
+  position: absolute;
+  bottom: -20px;
+  font-size: 11px;
+  color: var(--fd-muted);
+  white-space: nowrap;
+}
+
+/* ---------- Barras horizontales y medidores ---------- */
+.barras,
+.medidores {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.barras li {
+  display: grid;
+  grid-template-columns: minmax(90px, 30%) 1fr auto;
+  align-items: center;
+  gap: 10px;
+  outline: none;
+}
+
+.nombre {
+  font-size: 13px;
+  color: var(--fd-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cifra {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fd-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.pista {
+  display: block;
+  height: 10px;
+  background: var(--pista);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.barra {
+  display: block;
+  height: 100%;
+  background: var(--serie);
+  border-radius: 0 4px 4px 0;
+  transition: width 0.4s ease;
+}
+
+.barras li:hover .barra,
+.barras li:focus-visible .barra,
+.medidores li:hover .barra,
+.medidores li:focus-visible .barra {
+  background: var(--serie-hover);
+}
+
+.barras li:focus-visible,
+.medidores li:focus-visible {
+  box-shadow: 0 0 0 2px var(--fd-info);
+  border-radius: 4px;
+}
+
+.medidores li {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  outline: none;
+}
+
+.medidores .fila {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+/* ---------- Tabla accesible ---------- */
+.grafico-tabla {
+  margin-top: 12px;
+  font-size: 13px;
+}
+
+.grafico-tabla summary {
+  cursor: pointer;
+  color: var(--fd-muted);
+}
+
+.grafico-tabla table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+}
+
+.grafico-tabla th,
+.grafico-tabla td {
+  text-align: left;
+  padding: 4px 6px;
+  border-bottom: 1px solid var(--fd-border);
+}
+
+.grafico-tabla td:last-child,
+.grafico-tabla th:last-child {
+  text-align: right;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .columna,
+  .barra {
+    transition: none;
+  }
+}
