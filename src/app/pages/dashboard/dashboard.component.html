@@ -38,13 +38,16 @@
       }
     </div>
 
-    <div class="card">
-      <h2 class="card-title"><mat-icon aria-hidden="true">description</mat-icon> Licencias por vencer (30 días)</h2>
-      @for (l of d.licenciasPorVencer; track l.idLicencia) {
-        <p class="row-item"><strong>{{ l.numero }}</strong> · {{ l.nombreProyecto }} — vence {{ l.fechaVencimiento | date: 'dd/MM/yyyy' }}</p>
-      } @empty {
-        <p class="no-data">No hay licencias por vencer en los próximos 30 días.</p>
-      }
-    </div>
+    <!-- Licencias: módulo de gestión, no se muestra al supervisor -->
+    @if (d.rol !== 'SUPERVISOR') {
+      <div class="card">
+        <h2 class="card-title"><mat-icon aria-hidden="true">description</mat-icon> Licencias por vencer (30 días)</h2>
+        @for (l of d.licenciasPorVencer; track l.idLicencia) {
+          <p class="row-item"><strong>{{ l.numero }}</strong> · {{ l.nombreProyecto }} — vence {{ l.fechaVencimiento | date: 'dd/MM/yyyy' }}</p>
+        } @empty {
+          <p class="no-data">No hay licencias por vencer en los próximos 30 días.</p>
+        }
+      </div>
+    }
   }
 </div>

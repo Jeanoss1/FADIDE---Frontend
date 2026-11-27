@@ -16,6 +16,7 @@ import { PagoService } from '../../../services/pago.service';
 import { PenalidadService } from '../../../services/penalidad.service';
 import { ProyectoService } from '../../../services/proyecto.service';
 import { SupervisionService } from '../../../services/supervision.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { EstadoClassPipe, EstadoLabelPipe } from '../../../shared/estado.pipe';
 
 // Vista maestro-detalle: el contrato con sus pagos, penalidades y supervisión
@@ -41,6 +42,9 @@ export class ContratoDetailComponent {
   private readonly pagoService = inject(PagoService);
   private readonly penalidadService = inject(PenalidadService);
   private readonly supervisionService = inject(SupervisionService);
+  private readonly authService = inject(AuthService);
+  // La bitácora (evidencias y observaciones) es del módulo de campo: ADMIN y SUPERVISOR
+  protected $verBitacora = computed(() => this.authService.hasRole('ADMIN', 'SUPERVISOR'));
 
   private readonly $params = toSignal(this.route.params, { initialValue: {} });
   protected $id = computed(() => Number(this.$params()['id']));

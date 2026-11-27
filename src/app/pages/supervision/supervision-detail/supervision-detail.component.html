@@ -18,9 +18,11 @@
         </div>
         <div class="full-row"><small>Descripción</small><strong>{{ s.descripcion || '—' }}</strong></div>
       </div>
-      <div class="form-actions">
-        <a mat-button [routerLink]="['/pages/contrato/detail', s.idContrato]"><mat-icon>assignment</mat-icon> Ver contrato</a>
-      </div>
+      @if ($verContrato()) {
+        <div class="form-actions">
+          <a mat-button [routerLink]="['/pages/contrato/detail', s.idContrato]"><mat-icon>assignment</mat-icon> Ver contrato</a>
+        </div>
+      }
     </div>
   }
 
@@ -28,7 +30,7 @@
     <section class="card">
       <h2 class="card-title"><mat-icon>photo_library</mat-icon> Evidencias ({{ $evidencias().length }})</h2>
 
-      @if ($isSupervisor()) {
+      @if ($canEdit()) {
         <form class="inline-form" [formGroup]="evidenciaForm" (submit)="addEvidencia()">
           <mat-form-field appearance="outline">
             <mat-label>URL de la imagen</mat-label>
@@ -55,7 +57,7 @@
               <span>{{ e.descripcion || 'Sin descripción' }}</span>
               <small>{{ e.fecha | date: 'dd/MM/yyyy' }}</small>
             </figcaption>
-            @if ($isSupervisor()) {
+            @if ($canEdit()) {
               <button mat-icon-button class="remove" (click)="deleteEvidencia(e)" matTooltip="Eliminar"><mat-icon>delete</mat-icon></button>
             }
           </figure>
@@ -68,7 +70,7 @@
     <section class="card">
       <h2 class="card-title"><mat-icon>chat</mat-icon> Observaciones ({{ $observaciones().length }})</h2>
 
-      @if ($isSupervisor()) {
+      @if ($canEdit()) {
         <form class="inline-form" [formGroup]="observacionForm" (submit)="addObservacion()">
           <mat-form-field appearance="outline" class="wide">
             <mat-label>Observación</mat-label>
@@ -90,7 +92,7 @@
               <small>{{ o.fecha | date: 'dd/MM/yyyy' }}</small>
               <p>{{ o.descripcion }}</p>
             </div>
-            @if ($isSupervisor()) {
+            @if ($canEdit()) {
               <button mat-icon-button (click)="deleteObservacion(o)" matTooltip="Eliminar"><mat-icon color="warn">delete</mat-icon></button>
             }
           </li>
