@@ -456,3 +456,125 @@ a {
 .mat-mdc-dialog-content .form-grid {
   padding-top: 6px;
 }
+
+/* ---------- Barra de filtros de los listados paginados ---------- */
+.table-toolbar {
+  flex-wrap: wrap;
+}
+
+.filtros-listado {
+  display: contents;
+}
+
+.table-toolbar mat-form-field.filtro {
+  flex: 0 1 180px;
+  min-width: 150px;
+}
+
+.table-card mat-progress-bar {
+  margin-top: 8px;
+}
+
+/* ---------- Dashboard ---------- */
+.page > .kpis {
+  margin-bottom: 18px;
+}
+
+.graficos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+  gap: 0 18px;
+}
+
+.btn-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--fd-orange-dark);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.btn-link:hover,
+.btn-link:focus-visible {
+  text-decoration: underline;
+}
+
+/* ---------- Reportes ---------- */
+.reporte-tipos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.reporte-tipo {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 0;
+  padding: 14px 16px;
+  border: 2px solid transparent;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.15s;
+}
+
+.reporte-tipo:hover {
+  transform: translateY(-1px);
+}
+
+.reporte-tipo:focus-visible {
+  outline: 2px solid var(--fd-info);
+  outline-offset: 2px;
+}
+
+.reporte-tipo.activo {
+  border-color: var(--fd-orange);
+  background: var(--fd-orange-soft);
+}
+
+.reporte-tipo mat-icon {
+  color: var(--fd-orange-dark);
+}
+
+.reporte-tipo small {
+  display: block;
+  color: var(--fd-muted);
+  margin-top: 2px;
+}
+
+.toolbar-espacio {
+  flex: 1;
+}
+
+.reporte-resumen {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  padding: 14px 16px 0;
+}
+
+.reporte-resumen span {
+  color: var(--fd-muted);
+}
+
+.mat-mdc-cell.num,
+.mat-mdc-header-cell.num,
+.mat-mdc-footer-cell.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.fila-total .mat-mdc-footer-cell {
+  font-weight: 700;
+  background: var(--fd-orange-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reporte-tipo {
+    transition: none;
+  }
+}

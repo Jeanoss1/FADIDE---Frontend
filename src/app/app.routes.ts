@@ -25,9 +25,11 @@ import { UsuarioComponent } from './pages/usuario/usuario.component';
 import { UsuarioEditComponent } from './pages/usuario/usuario-edit/usuario-edit.component';
 import { ForbiddenComponent } from './pages/forbidden/forbidden.component';
 import { MiObraComponent } from './pages/portal/mi-obra/mi-obra.component';
+import { ReporteComponent } from './pages/reporte/reporte.component';
 
 const STAFF = ['ADMIN', 'GESTOR', 'SUPERVISOR'];
 const GESTION = ['ADMIN', 'GESTOR'];
+const CAMPO = ['ADMIN', 'SUPERVISOR'];
 
 export const routes: Routes = [
     { path: '', component: LandingComponent, title: 'SISCO | FADIDE' },
@@ -54,35 +56,35 @@ export const routes: Routes = [
             },
             { path: 'proyecto', component: ProyectoComponent, title: 'Obras | SISCO' },
             {
-                path: 'licencia', component: LicenciaComponent, title: 'Licencias | SISCO',
+                path: 'licencia', component: LicenciaComponent, data: { roles: GESTION }, title: 'Licencias | SISCO',
                 children: [
                     { path: 'new', component: LicenciaEditComponent, data: { roles: GESTION } },
                     { path: 'edit/:id', component: LicenciaEditComponent, data: { roles: GESTION } }
                 ]
             },
             {
-                path: 'contrato', component: ContratoComponent, title: 'Contratos | SISCO',
+                path: 'contrato', component: ContratoComponent, data: { roles: GESTION }, title: 'Contratos | SISCO',
                 children: [
                     { path: 'new', component: ContratoEditComponent, data: { roles: GESTION } }
                 ]
             },
-            { path: 'contrato/detail/:id', component: ContratoDetailComponent, title: 'Detalle del contrato | SISCO' },
+            { path: 'contrato/detail/:id', component: ContratoDetailComponent, data: { roles: GESTION }, title: 'Detalle del contrato | SISCO' },
             {
-                path: 'supervision', component: SupervisionComponent, title: 'Supervisión | SISCO',
+                path: 'supervision', component: SupervisionComponent, data: { roles: CAMPO }, title: 'Supervisión | SISCO',
                 children: [
-                    { path: 'new', component: SupervisionEditComponent, data: { roles: ['SUPERVISOR'] } },
-                    { path: 'edit/:id', component: SupervisionEditComponent, data: { roles: ['SUPERVISOR'] } }
+                    { path: 'new', component: SupervisionEditComponent, data: { roles: CAMPO } },
+                    { path: 'edit/:id', component: SupervisionEditComponent, data: { roles: CAMPO } }
                 ]
             },
-            { path: 'supervision/detail/:id', component: SupervisionDetailComponent, title: 'Bitácora | SISCO' },
+            { path: 'supervision/detail/:id', component: SupervisionDetailComponent, data: { roles: CAMPO }, title: 'Bitácora | SISCO' },
             {
-                path: 'pago', component: PagoComponent, title: 'Pagos | SISCO',
+                path: 'pago', component: PagoComponent, data: { roles: GESTION }, title: 'Pagos | SISCO',
                 children: [
                     { path: 'new', component: PagoEditComponent, data: { roles: GESTION } }
                 ]
             },
             {
-                path: 'penalidad', component: PenalidadComponent, title: 'Penalidades | SISCO',
+                path: 'penalidad', component: PenalidadComponent, data: { roles: GESTION }, title: 'Penalidades | SISCO',
                 children: [
                     { path: 'new', component: PenalidadEditComponent, data: { roles: GESTION } }
                 ]
@@ -93,6 +95,7 @@ export const routes: Routes = [
                     { path: 'new', component: UsuarioEditComponent }
                 ]
             },
+            { path: 'reporte', component: ReporteComponent, title: 'Reportes | SISCO' },
             { path: 'forbidden', component: ForbiddenComponent, title: 'Acceso denegado | SISCO' },
         ]
     },

@@ -9,7 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router, RouterLink } from '@angular/router';
-import { switchMap, tap } from 'rxjs';
+import { tap } from 'rxjs';
 import { today } from '../../../core/utils/dates';
 import { getErrorMessage } from '../../../core/utils/http-error';
 import { ESTADOS_PAGO } from '../../../model/pago';
@@ -61,8 +61,8 @@ export class PagoEditComponent {
     }
 
     this.pagoService.save(form.value).pipe(
-      switchMap(() => this.pagoService.findAll()),
-      tap(data => this.pagoService.setDataChange(data)),
+      // Escenario con recarga: el listado vuelve a pedir su página actual al backend
+      tap(() => this.pagoService.requestReload()),
       tap(() => this.pagoService.setMessageChange('Pago registrado'))
     ).subscribe({
       next: () => this.router.navigate(['/pages/pago']),

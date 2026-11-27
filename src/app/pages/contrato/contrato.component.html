@@ -17,13 +17,20 @@
     <div class="table-toolbar">
       <mat-form-field appearance="outline" subscriptSizing="dynamic">
         <mat-label>Buscar</mat-label>
-        <input matInput (keyup)="applyFilter($event)" placeholder="N° contrato, obra o estado" #input />
+        <input matInput (input)="list.search($any($event.target).value)" placeholder="N° contrato u obra" #input />
         <mat-icon matSuffix>search</mat-icon>
       </mat-form-field>
+      <app-filtros-listado [list]="list" [selects]="filtros" fechas="Inicio"></app-filtros-listado>
     </div>
 
+    @if (list.$loading()) {
+
+      <mat-progress-bar mode="indeterminate" aria-label="Cargando registros"></mat-progress-bar>
+
+    }
+
     <div class="table-scroll">
-      <table mat-table [dataSource]="$dataSource()" matSort>
+      <table mat-table [dataSource]="list.$rows()" matSort (matSortChange)="list.onSort($event)">
         <ng-container matColumnDef="numeroContrato">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>N° contrato</th>
           <td mat-cell *matCellDef="let row"><strong>{{ row.numeroContrato }}</strong></td>
@@ -84,6 +91,7 @@
       </table>
     </div>
 
-    <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Seleccionar página de contratos"></mat-paginator>
+    <mat-paginator [length]="list.$total()" [pageIndex]="list.page" [pageSize]="list.size"
+                   [pageSizeOptions]="[5, 10, 25, 100]" (page)="list.onPage($event)" aria-label="Seleccionar página de contratos"></mat-paginator>
   </div>
 </div>

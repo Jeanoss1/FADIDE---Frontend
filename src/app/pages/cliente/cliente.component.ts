@@ -1,13 +1,14 @@
-import { Component, computed, effect, inject, signal, untracked, viewChild } from '@angular/core';
+import { Component, computed, effect, inject, untracked } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatSort, MatSortModule } from '@angular/material/sort';
-import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatSortModule } from '@angular/material/sort';
+import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { filter, switchMap } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
@@ -16,6 +17,7 @@ import { Cliente } from '../../model/cliente';
 import { ClienteService } from '../../services/cliente.service';
 import { openConfirm } from '../../shared/confirm-dialog/confirm-dialog.component';
 import { ClienteDialogComponent } from './cliente-dialog/cliente-dialog.component';
+import { PagedList } from '../../shared/paged-list';
 
 @Component({
   imports: [
@@ -24,6 +26,7 @@ import { ClienteDialogComponent } from './cliente-dialog/cliente-dialog.componen
     MatIconModule,
     MatInputModule,
     MatPaginatorModule,
+    MatProgressBarModule,
     MatSortModule,
     MatTableModule,
     MatTooltipModule
@@ -33,13 +36,11 @@ import { ClienteDialogComponent } from './cliente-dialog/cliente-dialog.componen
 })
 export class ClienteComponent {
   private readonly clienteService = inject(ClienteService);
+  // Paginación, búsqueda, filtros y orden en el servidor
+  protected readonly list = new PagedList(this.clienteService, { sort: 'razonSocial,asc' });
   private readonly authService = inject(AuthService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly dialog = inject(MatDialog);
-
-  protected $dataSource = signal(new MatTableDataSource<Cliente>());
-  protected $paginator = viewChild(MatPaginator);
-  protected $sort = viewChild(MatSort);
 
   protected $clientes = this.clienteService.$dataChange;
   protected $canEdit = computed(() => this.authService.hasRole('ADMIN', 'GESTOR'));
@@ -49,17 +50,6 @@ export class ClienteComponent {
   });
 
   constructor() {
-    // Única carga completa de la lista; luego los cambios se aplican con mutación silenciosa
-    this.clienteService.findAll().subscribe(data => this.clienteService.setDataChange(data));
-
-    // Cada vez que cambia el signal de la lista, la tabla se refresca sola
-    effect(() => {
-      const ds = this.$dataSource();
-      ds.data = this.$clientes();
-      ds.paginator = this.$paginator();
-      ds.sort = this.$sort();
-    });
-
     effect(() => {
       const message = this.clienteService.$messageChange();
       if (message) {
@@ -67,11 +57,6 @@ export class ClienteComponent {
         untracked(() => this.clienteService.setMessageChange(''));
       }
     });
-  }
-
-  applyFilter(e: Event) {
-    const filterValue = (e.target as HTMLInputElement).value;
-    this.$dataSource().filter = filterValue.trim().toLowerCase();
   }
 
   // Abre el modal: sin cliente = registrar, con cliente = editar

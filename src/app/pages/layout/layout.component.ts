@@ -24,33 +24,40 @@ interface MenuSection {
   items: MenuItem[];
 }
 
+// Matriz de acceso por rol: ADMIN ve todo; GESTOR la gestión contractual y financiera;
+// SUPERVISOR el trabajo de campo y la consulta de clientes, contratistas y obras.
 const ALL: RolNombre[] = ['ADMIN', 'GESTOR', 'SUPERVISOR'];
+const GESTION: RolNombre[] = ['ADMIN', 'GESTOR'];
+const CAMPO: RolNombre[] = ['ADMIN', 'SUPERVISOR'];
 
 // Menú agrupado como en el prototipo: Entidades, Campo y Administración
 const MENU: MenuSection[] = [
   {
     title: 'General',
-    items: [{ label: 'Dashboard', icon: 'space_dashboard', route: '/pages/dashboard', roles: ALL }],
+    items: [
+      { label: 'Dashboard', icon: 'space_dashboard', route: '/pages/dashboard', roles: ALL },
+      { label: 'Reportes', icon: 'summarize', route: '/pages/reporte', roles: ALL },
+    ],
   },
   {
     title: 'Entidades',
     items: [
       { label: 'Clientes', icon: 'groups', route: '/pages/cliente', roles: ALL },
       { label: 'Contratistas', icon: 'engineering', route: '/pages/contratista', roles: ALL },
-      { label: 'Licencias', icon: 'description', route: '/pages/licencia', roles: ALL },
+      { label: 'Licencias', icon: 'description', route: '/pages/licencia', roles: GESTION },
       { label: 'Obras', icon: 'apartment', route: '/pages/proyecto', roles: ALL },
-      { label: 'Contratos', icon: 'assignment', route: '/pages/contrato', roles: ALL },
+      { label: 'Contratos', icon: 'assignment', route: '/pages/contrato', roles: GESTION },
     ],
   },
   {
     title: 'Campo',
-    items: [{ label: 'Supervisión', icon: 'fact_check', route: '/pages/supervision', roles: ALL }],
+    items: [{ label: 'Supervisión', icon: 'fact_check', route: '/pages/supervision', roles: CAMPO }],
   },
   {
     title: 'Administración',
     items: [
-      { label: 'Pagos', icon: 'payments', route: '/pages/pago', roles: ALL },
-      { label: 'Penalidades', icon: 'report_problem', route: '/pages/penalidad', roles: ALL },
+      { label: 'Pagos', icon: 'payments', route: '/pages/pago', roles: GESTION },
+      { label: 'Penalidades', icon: 'report_problem', route: '/pages/penalidad', roles: GESTION },
       { label: 'Usuarios', icon: 'manage_accounts', route: '/pages/usuario', roles: ['ADMIN'] },
     ],
   },

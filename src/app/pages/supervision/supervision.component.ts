@@ -1,14 +1,15 @@
-import { Component, computed, effect, inject, signal, untracked, viewChild } from '@angular/core';
+import { Component, computed, effect, inject, untracked } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatSort, MatSortModule } from '@angular/material/sort';
-import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatSortModule } from '@angular/material/sort';
+import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { filter, switchMap, tap } from 'rxjs';
@@ -17,6 +18,8 @@ import { getErrorMessage } from '../../core/utils/http-error';
 import { Supervision } from '../../model/supervision';
 import { SupervisionService } from '../../services/supervision.service';
 import { openConfirm } from '../../shared/confirm-dialog/confirm-dialog.component';
+import { PagedList } from '../../shared/paged-list';
+import { FiltrosListadoComponent } from '../../shared/filtros-listado/filtros-listado.component';
 
 @Component({
   imports: [
@@ -27,6 +30,8 @@ import { openConfirm } from '../../shared/confirm-dialog/confirm-dialog.componen
     MatIconModule,
     MatInputModule,
     MatPaginatorModule,
+    MatProgressBarModule,
+    FiltrosListadoComponent,
     MatSortModule,
     MatTableModule,
     MatTooltipModule,
@@ -38,29 +43,19 @@ import { openConfirm } from '../../shared/confirm-dialog/confirm-dialog.componen
 })
 export class SupervisionComponent {
   private readonly supervisionService = inject(SupervisionService);
+  // Paginación, búsqueda, filtros y orden en el servidor
+  protected readonly list = new PagedList(this.supervisionService, { sort: 'fechaRegistro,desc', sortMap: { fecha: 'fechaRegistro', avance: 'avancePorcentual', descripcion: 'observaciones', numeroContrato: 'contrato.numeroContrato' } });
   private readonly authService = inject(AuthService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly dialog = inject(MatDialog);
 
-  protected $dataSource = signal(new MatTableDataSource<Supervision>());
-  protected $paginator = viewChild(MatPaginator);
-  protected $sort = viewChild(MatSort);
-
   protected $supervisiones = this.supervisionService.$dataChange;
   // Solo el supervisor registra y modifica la bitácora (regla del backend)
-  protected $isSupervisor = computed(() => this.authService.hasRole('SUPERVISOR'));
+  // Registrar, editar y eliminar trabajo de campo: SUPERVISOR y ADMIN (acceso total)
+  protected $canEdit = computed(() => this.authService.hasRole('ADMIN', 'SUPERVISOR'));
   protected displayedColumns = ['fecha', 'numeroContrato', 'avance', 'descripcion', 'actions'];
 
   constructor() {
-    this.supervisionService.findAll().subscribe(data => this.supervisionService.setDataChange(data));
-
-    effect(() => {
-      const ds = this.$dataSource();
-      ds.data = this.$supervisiones();
-      ds.paginator = this.$paginator();
-      ds.sort = this.$sort();
-    });
-
     effect(() => {
       const message = this.supervisionService.$messageChange();
       if (message) {
@@ -70,11 +65,6 @@ export class SupervisionComponent {
     });
   }
 
-  applyFilter(e: Event) {
-    const filterValue = (e.target as HTMLInputElement).value;
-    this.$dataSource().filter = filterValue.trim().toLowerCase();
-  }
-
   delete(supervision: Supervision) {
     openConfirm(this.dialog, {
       title: 'Eliminar supervisión',
@@ -82,8 +72,7 @@ export class SupervisionComponent {
     }).pipe(
       filter(Boolean),
       switchMap(() => this.supervisionService.delete(supervision.idSupervision)),
-      switchMap(() => this.supervisionService.findAll()),
-      tap(data => this.supervisionService.setDataChange(data)),
+      tap(() => this.supervisionService.requestReload()),
       tap(() => this.supervisionService.setMessageChange('Supervisión eliminada'))
     ).subscribe({
       error: err => this.snackBar.open(getErrorMessage(err), 'OK', { duration: 4000, panelClass: 'snack-error' })

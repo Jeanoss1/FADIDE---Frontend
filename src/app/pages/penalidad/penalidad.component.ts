@@ -1,20 +1,23 @@
-import { Component, computed, effect, inject, signal, untracked, viewChild } from '@angular/core';
+import { Component, computed, effect, inject, untracked } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatSort, MatSortModule } from '@angular/material/sort';
-import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatSortModule } from '@angular/material/sort';
+import { MatTableModule } from '@angular/material/table';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
-import { Penalidad } from '../../model/penalidad';
+import { ESTADOS_PENALIDAD, Penalidad } from '../../model/penalidad';
 import { ContratoService } from '../../services/contrato.service';
 import { PenalidadService } from '../../services/penalidad.service';
 import { EstadoClassPipe, EstadoLabelPipe } from '../../shared/estado.pipe';
+import { PagedList } from '../../shared/paged-list';
+import { FiltrosListadoComponent, SelectFiltro, opcionesDeEstados } from '../../shared/filtros-listado/filtros-listado.component';
 
 @Component({
   imports: [
@@ -25,6 +28,8 @@ import { EstadoClassPipe, EstadoLabelPipe } from '../../shared/estado.pipe';
     MatIconModule,
     MatInputModule,
     MatPaginatorModule,
+    MatProgressBarModule,
+    FiltrosListadoComponent,
     MatSortModule,
     MatTableModule,
     RouterLink,
@@ -37,32 +42,20 @@ import { EstadoClassPipe, EstadoLabelPipe } from '../../shared/estado.pipe';
 })
 export class PenalidadComponent {
   private readonly penalidadService = inject(PenalidadService);
+  // Paginación, búsqueda, filtros y orden en el servidor
+  protected readonly list = new PagedList(this.penalidadService, { sort: 'fechaAplicacion,desc' });
+  protected readonly filtros: SelectFiltro[] = [{ key: 'estado', label: 'Estado', options: opcionesDeEstados(ESTADOS_PENALIDAD) }];
   private readonly authService = inject(AuthService);
   private readonly snackBar = inject(MatSnackBar);
 
   private readonly $contratos = toSignal(inject(ContratoService).findAll(), { initialValue: [] });
   protected $numeroContrato = computed(() => new Map(this.$contratos().map(c => [c.idContrato, c.numeroContrato])));
 
-  protected $dataSource = signal(new MatTableDataSource<Penalidad>());
-  protected $paginator = viewChild(MatPaginator);
-  protected $sort = viewChild(MatSort);
-
   protected $penalidades = this.penalidadService.$dataChange;
   protected $canEdit = computed(() => this.authService.hasRole('ADMIN', 'GESTOR'));
   protected displayedColumns = ['contrato', 'fechaAplicacion', 'montoUit', 'motivo', 'estado'];
 
   constructor() {
-    this.penalidadService.findAll().subscribe(data => this.penalidadService.setDataChange(data));
-
-    effect(() => {
-      const ds = this.$dataSource();
-      const numeros = this.$numeroContrato();
-      ds.filterPredicate = (p, f) => [numeros.get(p.idContrato), p.motivo, p.estado].join(' ').toLowerCase().includes(f);
-      ds.data = this.$penalidades();
-      ds.paginator = this.$paginator();
-      ds.sort = this.$sort();
-    });
-
     effect(() => {
       const message = this.penalidadService.$messageChange();
       if (message) {
@@ -70,10 +63,5 @@ export class PenalidadComponent {
         untracked(() => this.penalidadService.setMessageChange(''));
       }
     });
-  }
-
-  applyFilter(e: Event) {
-    const filterValue = (e.target as HTMLInputElement).value;
-    this.$dataSource().filter = filterValue.trim().toLowerCase();
   }
 }

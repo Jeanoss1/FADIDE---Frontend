@@ -2,23 +2,52 @@
   <div class="page-header">
     <div>
       <h1>Bienvenido, {{ authService.$session()?.nombreCompleto }}</h1>
-      <p>Resumen general de SISCO</p>
+      <p>{{ $subtitulo() }}</p>
     </div>
+    <a class="btn-link" routerLink="/pages/reporte"><mat-icon>summarize</mat-icon> Ver reportes</a>
   </div>
 
-  <div class="kpis">
-    <a class="card kpi" routerLink="/pages/cliente"><mat-icon>groups</mat-icon><div><strong>{{ $totalClientes() }}</strong><span>Clientes</span></div></a>
-    <a class="card kpi" routerLink="/pages/proyecto"><mat-icon>apartment</mat-icon><div><strong>{{ $enEjecucion() }}</strong><span>Obras en ejecución</span></div></a>
-    <a class="card kpi" routerLink="/pages/contrato"><mat-icon>assignment</mat-icon><div><strong>{{ $vigentes() }}</strong><span>Contratos abiertos</span></div></a>
-    <a class="card kpi" routerLink="/pages/licencia"><mat-icon>warning_amber</mat-icon><div><strong>{{ $porVencer().length }}</strong><span>Licencias por vencer (30 d)</span></div></a>
-  </div>
+  @if ($estado().cargando) {
+    <mat-progress-bar mode="indeterminate" aria-label="Cargando indicadores"></mat-progress-bar>
+  }
 
-  <div class="card">
-    <h2 class="card-title"><mat-icon>description</mat-icon> Licencias por vencer</h2>
-    @for (l of $porVencer(); track l.idLicencia) {
-      <p class="row-item"><strong>{{ l.numero }}</strong> · {{ l.nombreProyecto }} — vence {{ l.fechaVencimiento | date: 'dd/MM/yyyy' }}</p>
-    } @empty {
-      <p class="no-data">No hay licencias por vencer en los próximos 30 días.</p>
+  @if ($estado().error; as error) {
+    <div class="card"><p class="no-data">{{ error }}</p></div>
+  }
+
+  @if ($estado().datos; as d) {
+    <div class="kpis">
+      @for (k of d.kpis; track k.clave) {
+        @if (k.ruta) {
+          <a class="card kpi" [routerLink]="k.ruta">
+            <mat-icon aria-hidden="true">{{ k.icono }}</mat-icon>
+            <div><strong>{{ k.valor | valor: k.formato }}</strong><span>{{ k.etiqueta }}</span></div>
+          </a>
+        } @else {
+          <div class="card kpi">
+            <mat-icon aria-hidden="true">{{ k.icono }}</mat-icon>
+            <div><strong>{{ k.valor | valor: k.formato }}</strong><span>{{ k.etiqueta }}</span></div>
+          </div>
+        }
+      }
+    </div>
+
+    <div class="graficos">
+      @for (g of d.graficos; track g.clave) {
+        <div class="card"><app-grafico [grafico]="g"></app-grafico></div>
+      }
+    </div>
+
+    <!-- Licencias: módulo de gestión, no se muestra al supervisor -->
+    @if (d.rol !== 'SUPERVISOR') {
+      <div class="card">
+        <h2 class="card-title"><mat-icon aria-hidden="true">description</mat-icon> Licencias por vencer (30 días)</h2>
+        @for (l of d.licenciasPorVencer; track l.idLicencia) {
+          <p class="row-item"><strong>{{ l.numero }}</strong> · {{ l.nombreProyecto }} — vence {{ l.fechaVencimiento | date: 'dd/MM/yyyy' }}</p>
+        } @empty {
+          <p class="no-data">No hay licencias por vencer en los próximos 30 días.</p>
+        }
+      </div>
     }
-  </div>
+  }
 </div>
