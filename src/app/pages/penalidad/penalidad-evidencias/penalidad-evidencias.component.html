@@ -1,0 +1,90 @@
+<h2 mat-dialog-title>Evidencias de la penalidad</h2>
+
+<mat-dialog-content>
+  <p class="resumen">
+    <strong>{{ data.numeroContrato }}</strong> · {{ data.penalidad.fechaAplicacion | date: 'dd/MM/yyyy' }}
+    · {{ data.penalidad.montoUit | number: '1.2-4' }} UIT<br />
+    <span>{{ data.penalidad.motivo }}</span>
+  </p>
+
+  @if (data.puedeEditar) {
+    <form class="subida" [formGroup]="form" (submit)="subir()">
+      <input #selector type="file" hidden [accept]="aceptar" (change)="seleccionar($event)" />
+      @if ($archivo(); as a) {
+        <div class="elegido">
+          @if ($vistaPrevia(); as vp) {
+            <img [src]="vp" alt="Vista previa del archivo seleccionado" />
+          } @else {
+            <mat-icon class="icono-archivo">attach_file</mat-icon>
+          }
+          <div class="elegido-datos">
+            <strong>{{ a.name }}</strong>
+            <small>{{ tamano(a.size) }}</small>
+          </div>
+          <button mat-icon-button type="button" (click)="quitar()" matTooltip="Quitar archivo"><mat-icon>close</mat-icon></button>
+        </div>
+      } @else {
+        <button mat-stroked-button type="button" class="soltar" (click)="selector.click()">
+          <mat-icon>cloud_upload</mat-icon>
+          <span>Elegir archivo</span>
+          <small>Acta, informe, carta, foto, Excel... (imágenes, PDF, Word, Excel, PowerPoint, DWG o texto · máx. 10 MB)</small>
+        </button>
+      }
+
+      <div class="fila">
+        <mat-form-field appearance="outline">
+          <mat-label>Fecha</mat-label>
+          <input matInput type="date" formControlName="fecha" [max]="maxDate" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="ancho">
+          <mat-label>Descripción</mat-label>
+          <input matInput formControlName="descripcion" placeholder="Ej.: Acta de constatación de retraso" />
+        </mat-form-field>
+      </div>
+      <button mat-flat-button class="btn-primary" type="submit" [disabled]="$subiendo() || !$archivo()">
+        <mat-icon>upload_file</mat-icon> {{ $subiendo() ? 'Subiendo...' : 'Subir evidencia' }}
+      </button>
+      @if ($subiendo()) {
+        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+      }
+    </form>
+  }
+
+  @if ($cargando()) {
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+  }
+
+  <ul class="lista">
+    @for (e of $evidencias(); track e.idEvidenciaPenalidad) {
+      <li>
+        <button type="button" class="vista" (click)="abrir(e)" [attr.aria-label]="'Abrir ' + e.nombreOriginal">
+          @if (e.categoria === 'IMAGEN' && $miniaturas()[e.idEvidenciaPenalidad]; as src) {
+            <img [src]="src" [alt]="e.descripcion || e.nombreOriginal" />
+          } @else {
+            <span class="icono-tipo" [attr.data-categoria]="e.categoria"><mat-icon>{{ iconos[e.categoria] }}</mat-icon></span>
+          }
+        </button>
+        <div class="datos">
+          <strong [title]="e.nombreOriginal">{{ e.nombreOriginal }}</strong>
+          <span>{{ e.descripcion || 'Sin descripción' }}</span>
+          <small>{{ e.fecha | date: 'dd/MM/yyyy' }} · {{ tamano(e.tamanoBytes) }}</small>
+        </div>
+        <button mat-icon-button (click)="abrir(e)"
+                [matTooltip]="e.categoria === 'IMAGEN' || e.categoria === 'PDF' ? 'Ver' : 'Descargar'">
+          <mat-icon>{{ e.categoria === 'IMAGEN' || e.categoria === 'PDF' ? 'visibility' : 'download' }}</mat-icon>
+        </button>
+        @if (data.puedeEditar) {
+          <button mat-icon-button class="eliminar" (click)="eliminar(e)" matTooltip="Eliminar"><mat-icon>delete</mat-icon></button>
+        }
+      </li>
+    } @empty {
+      @if (!$cargando()) {
+        <p class="no-data">Esta penalidad aún no tiene evidencias.</p>
+      }
+    }
+  </ul>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cerrar</button>
+</mat-dialog-actions>
