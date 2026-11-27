@@ -10,6 +10,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { catchError, finalize, of } from 'rxjs';
+import { AuthService } from '../../core/services/auth.service';
 import { getErrorMessage } from '../../core/utils/http-error';
 import { PageQuery } from '../../model/page';
 import { DefinicionReporte, REPORTES, TablaReporte } from '../../model/reporte';
@@ -39,11 +40,19 @@ export class ReporteComponent {
   private readonly reporteService = inject(ReporteService);
   private readonly snackBar = inject(MatSnackBar);
 
-  protected readonly reportes = REPORTES;
-  protected readonly $obras = toSignal(inject(ProyectoService).findAll().pipe(catchError(() => of([]))), { initialValue: [] });
-  protected readonly $supervisores = toSignal(this.reporteService.supervisores().pipe(catchError(() => of([]))), { initialValue: [] });
+  private readonly authService = inject(AuthService);
 
-  protected $definicion = signal<DefinicionReporte>(REPORTES[0]);
+  // Solo los tipos de reporte permitidos al rol (el backend aplica la misma regla)
+  protected readonly reportes = REPORTES.filter(r => this.authService.hasRole(...r.roles));
+  protected readonly $obras = toSignal(inject(ProyectoService).findAll().pipe(catchError(() => of([]))), { initialValue: [] });
+  // La lista de supervisores solo se usa en el reporte de supervisiones (ADMIN y SUPERVISOR)
+  protected readonly $supervisores = toSignal(
+    this.reportes.some(r => r.porSupervisor)
+      ? this.reporteService.supervisores().pipe(catchError(() => of([])))
+      : of([]),
+    { initialValue: [] });
+
+  protected $definicion = signal<DefinicionReporte>(this.reportes[0]);
   protected $filtros = signal<PageQuery>({});
   protected $reporte = signal<TablaReporte | null>(null);
   protected $cargando = signal(false);

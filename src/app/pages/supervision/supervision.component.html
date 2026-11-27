@@ -4,7 +4,7 @@
       <h1>Supervisión de obras</h1>
       <p>Bitácora de avance físico registrada por los supervisores de campo.</p>
     </div>
-    @if ($isSupervisor()) {
+    @if ($canEdit()) {
       <a mat-flat-button class="btn-primary" routerLink="/pages/supervision/new">
         <mat-icon>add</mat-icon> Registrar Avance
       </a>
@@ -60,7 +60,7 @@
             <a mat-icon-button [routerLink]="['/pages/supervision/detail', row.idSupervision]" matTooltip="Evidencias y observaciones">
               <mat-icon>photo_library</mat-icon>
             </a>
-            @if ($isSupervisor()) {
+            @if ($canEdit()) {
               <button mat-icon-button [routerLink]="['edit', row.idSupervision]" matTooltip="Editar">
                 <mat-icon>edit</mat-icon>
               </button>

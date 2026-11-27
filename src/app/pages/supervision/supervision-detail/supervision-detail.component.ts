@@ -49,7 +49,10 @@ export class SupervisionDetailComponent {
 
   private readonly $params = toSignal(this.route.params, { initialValue: {} });
   protected $id = computed(() => Number(this.$params()['id']));
-  protected $isSupervisor = computed(() => this.authService.hasRole('SUPERVISOR'));
+  // Registrar, editar y eliminar trabajo de campo: SUPERVISOR y ADMIN (acceso total)
+  protected $canEdit = computed(() => this.authService.hasRole('ADMIN', 'SUPERVISOR'));
+  // El detalle del contrato es del módulo de gestión: ADMIN y GESTOR
+  protected $verContrato = computed(() => this.authService.hasRole('ADMIN', 'GESTOR'));
 
   protected $supervision = signal<Supervision | null>(null);
   protected $evidencias = signal<Evidencia[]>([]);

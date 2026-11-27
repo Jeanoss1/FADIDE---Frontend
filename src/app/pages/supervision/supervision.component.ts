@@ -51,7 +51,8 @@ export class SupervisionComponent {
 
   protected $supervisiones = this.supervisionService.$dataChange;
   // Solo el supervisor registra y modifica la bitácora (regla del backend)
-  protected $isSupervisor = computed(() => this.authService.hasRole('SUPERVISOR'));
+  // Registrar, editar y eliminar trabajo de campo: SUPERVISOR y ADMIN (acceso total)
+  protected $canEdit = computed(() => this.authService.hasRole('ADMIN', 'SUPERVISOR'));
   protected displayedColumns = ['fecha', 'numeroContrato', 'avance', 'descripcion', 'actions'];
 
   constructor() {
