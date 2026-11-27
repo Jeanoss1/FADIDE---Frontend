@@ -95,3 +95,118 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* ---------- Evidencias con archivo ---------- */
+.inline-form .modo {
+    flex-basis: 100%;
+    margin-bottom: 10px;
+    width: fit-content;
+}
+
+.selector {
+    flex-basis: 100%;
+    margin-bottom: 14px;
+}
+
+.soltar {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    width: 100%;
+    height: auto;
+    padding: 14px 10px;
+    border: 2px dashed var(--fd-border);
+    border-radius: 10px;
+    white-space: normal;
+}
+
+.soltar mat-icon {
+    color: var(--fd-orange);
+}
+
+.soltar small {
+    color: var(--fd-muted);
+}
+
+.elegido {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border: 1px solid var(--fd-border);
+    border-radius: 10px;
+    background: #fafbfc;
+}
+
+.elegido img {
+    width: 56px;
+    height: 56px;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+.elegido-datos {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.elegido-datos strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.elegido-datos small,
+.photo .nombre {
+    color: var(--fd-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.icono-archivo {
+    color: var(--fd-orange);
+}
+
+.photo .vista {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+}
+
+.photo .vista:focus-visible {
+    outline: 3px solid var(--fd-orange);
+    outline-offset: -3px;
+}
+
+.icono-tipo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    height: 130px;
+    background: #eceff3;
+    color: #4b5563;
+}
+
+.icono-tipo mat-icon {
+    width: 44px;
+    height: 44px;
+    font-size: 44px;
+}
+
+.icono-tipo small {
+    font-weight: 600;
+    letter-spacing: 0.04em;
+}
+
+.icono-tipo[data-categoria='PDF'] mat-icon { color: #c62828; }
+.icono-tipo[data-categoria='WORD'] mat-icon { color: #1e5bb8; }
+.icono-tipo[data-categoria='EXCEL'] mat-icon { color: #1d7a46; }
+.icono-tipo[data-categoria='POWERPOINT'] mat-icon { color: #c4501b; }

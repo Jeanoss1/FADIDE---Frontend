@@ -2,7 +2,7 @@
   <div class="page-header">
     <div>
       <h1>Bitácora — Contrato {{ $supervision()?.numeroContrato }}</h1>
-      <p>Evidencias fotográficas y observaciones de la supervisión.</p>
+      <p>Evidencias (fotos, PDF, documentos y planos) y observaciones de la supervisión.</p>
     </div>
     <a mat-stroked-button routerLink="/pages/supervision"><mat-icon>arrow_back</mat-icon> Volver</a>
   </div>
@@ -32,11 +32,43 @@
 
       @if ($canEdit()) {
         <form class="inline-form" [formGroup]="evidenciaForm" (submit)="addEvidencia()">
-          <mat-form-field appearance="outline">
-            <mat-label>URL de la imagen</mat-label>
-            <input matInput formControlName="imagen" placeholder="https://..." />
-            <mat-error>La URL es obligatoria</mat-error>
-          </mat-form-field>
+          <mat-button-toggle-group class="modo" [value]="$modo()" (change)="cambiarModo($event.value)" aria-label="Tipo de evidencia">
+            <mat-button-toggle value="archivo"><mat-icon>upload_file</mat-icon> Subir archivo</mat-button-toggle>
+            <mat-button-toggle value="enlace"><mat-icon>link</mat-icon> Pegar enlace</mat-button-toggle>
+          </mat-button-toggle-group>
+
+          @if ($modo() === 'archivo') {
+            <div class="selector wide">
+              <input #selector type="file" hidden [accept]="aceptar" (change)="seleccionarArchivo($event)" />
+              @if ($archivo(); as a) {
+                <div class="elegido">
+                  @if ($vistaPrevia(); as vp) {
+                    <img [src]="vp" alt="Vista previa del archivo seleccionado" />
+                  } @else {
+                    <mat-icon class="icono-archivo">attach_file</mat-icon>
+                  }
+                  <div class="elegido-datos">
+                    <strong>{{ a.name }}</strong>
+                    <small>{{ tamano(a.size) }}</small>
+                  </div>
+                  <button mat-icon-button type="button" (click)="quitarArchivo()" matTooltip="Quitar archivo"><mat-icon>close</mat-icon></button>
+                </div>
+              } @else {
+                <button mat-stroked-button type="button" class="soltar" (click)="selector.click()">
+                  <mat-icon>cloud_upload</mat-icon>
+                  <span>Elegir archivo</span>
+                  <small>Imágenes, PDF, Word, Excel, PowerPoint, DWG o texto · máx. 10 MB</small>
+                </button>
+              }
+            </div>
+          } @else {
+            <mat-form-field appearance="outline" class="wide">
+              <mat-label>Enlace de la evidencia</mat-label>
+              <input matInput formControlName="imagen" placeholder="https://..." />
+              <mat-error>El enlace es obligatorio</mat-error>
+            </mat-form-field>
+          }
+
           <mat-form-field appearance="outline">
             <mat-label>Fecha</mat-label>
             <input matInput type="date" formControlName="fecha" [max]="maxDate" />
@@ -45,16 +77,40 @@
             <mat-label>Descripción</mat-label>
             <input matInput formControlName="descripcion" />
           </mat-form-field>
-          <button mat-flat-button class="btn-primary" type="submit"><mat-icon>add_a_photo</mat-icon> Agregar</button>
+          <button mat-flat-button class="btn-primary" type="submit" [disabled]="$subiendo()">
+            <mat-icon>add_a_photo</mat-icon> {{ $subiendo() ? 'Subiendo...' : 'Agregar' }}
+          </button>
+          @if ($subiendo()) {
+            <mat-progress-bar class="wide" mode="indeterminate"></mat-progress-bar>
+          }
         </form>
       }
 
       <div class="gallery">
         @for (e of $evidencias(); track e.idEvidencia) {
           <figure class="photo">
-            <a [href]="e.imagen" target="_blank" rel="noopener"><img [src]="e.imagen" [alt]="e.descripcion || 'Evidencia'" loading="lazy"></a>
+            <button type="button" class="vista" (click)="abrirEvidencia(e)"
+                    [attr.aria-label]="(e.categoria === 'IMAGEN' || e.categoria === 'PDF' || e.categoria === 'ENLACE' ? 'Abrir ' : 'Descargar ') + e.imagen">
+              @if (e.tieneArchivo && e.categoria === 'IMAGEN') {
+                @if ($miniaturas()[e.idEvidencia]; as src) {
+                  <img [src]="src" [alt]="e.descripcion || e.imagen" />
+                } @else {
+                  <span class="icono-tipo"><mat-icon>image</mat-icon></span>
+                }
+              } @else if (!e.tieneArchivo) {
+                <img [src]="e.imagen" [alt]="e.descripcion || 'Evidencia'" loading="lazy" />
+              } @else {
+                <span class="icono-tipo" [attr.data-categoria]="e.categoria">
+                  <mat-icon>{{ iconos[e.categoria] }}</mat-icon>
+                  <small>{{ e.categoria === 'PLANO' ? 'DWG' : e.categoria }}</small>
+                </span>
+              }
+            </button>
             <figcaption>
               <span>{{ e.descripcion || 'Sin descripción' }}</span>
+              @if (e.tieneArchivo) {
+                <small class="nombre" [title]="e.imagen">{{ e.imagen }} · {{ tamano(e.tamanoBytes) }}</small>
+              }
               <small>{{ e.fecha | date: 'dd/MM/yyyy' }}</small>
             </figcaption>
             @if ($canEdit()) {
